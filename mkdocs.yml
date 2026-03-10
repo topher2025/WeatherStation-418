@@ -1,0 +1,31 @@
+site_name: Weather Station Documentation
+site_url: https://topher2025.github.io/WeatherStation-418/
+
+repo_url: https://github.com/topher2025/WeatherStation-418
+repo_name: WeatherStation-418
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Communication Protocol: communication_protocol.md
+  - Database Schema: database_schema.md
+  - Security Model: security_model.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - codehilite
+  - tables
+
+plugins:
+  - search

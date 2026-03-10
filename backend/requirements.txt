@@ -1,0 +1,26 @@
+# pi4/requirements.txt
+
+# Web server
+flask>=2.3.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0   # PostgreSQL driver
+# sqlite3 is built-in, no pip needed
+
+# Password management & security
+passlib>=1.7.4
+itsdangerous>=2.1.2
+
+# Optional: environment variables
+python-dotenv>=1.0.0
+
+# For API / JSON handling
+requests>=2.31.0
+
+# Optional: plotting for server-side generation
+matplotlib>=3.8.0
+
+# Linting / dev only
+black>=23.3.0
+ruff>=0.0.300
