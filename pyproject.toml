@@ -11,5 +11,9 @@ requires-python = ">=3.11"
 line-length = 88
 
 [tool.ruff]
+exclude = [
+    "**/bme680.py",
+    "**/__init__.py",
+]
 line-length = 88
 select = ["E", "F", "W"]
