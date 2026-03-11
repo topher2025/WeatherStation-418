@@ -11,5 +11,8 @@ requires-python = ">=3.11"
 line-length = 88
 
 [tool.ruff]
+extend-exclude = [
+    "firmware/bme680.py"
+]
 line-length = 88
 select = ["E", "F", "W"]
