@@ -12,8 +12,7 @@ line-length = 88
 
 [tool.ruff]
 extend-exclude = [
-    "**/bme680.py",
-    "**/__init__.py",
+    "firmware/bme680.py"
 ]
 line-length = 88
 select = ["E", "F", "W"]
