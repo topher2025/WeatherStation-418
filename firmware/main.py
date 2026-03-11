@@ -1,0 +1,38 @@
+# Rui Santos & Sara Santos - Random Nerd Tutorials
+# Complete project details: https://RandomNerdTutorials.com/raspberry-pi-pico-bme680-micropython/
+
+from machine import Pin, I2C
+from time import sleep
+from bme680 import *
+import json
+
+# RPi Pico - Pin assignment
+with open('pins.json') as f:
+    pins = json.load(f)
+
+i2c = I2C(id=0, scl=Pin(pins['scl']), sda=Pin(pins['sda']))
+
+bme = BME680_I2C(i2c=i2c)
+
+def read_sensor():
+    try:
+        tempC = round(bme.temperature, 2)                  # Celsius
+        tempF = round((bme.temperature * (9 / 5) + 32), 2) # Fahrenheit
+        hum = round(bme.humidity, 2)                       # Percent
+        pres = round(bme.pressure, 2)                      # hPa
+        gas = round(bme.gas / 1000, 2)                     # kOhms
+
+        out = {
+            'temperature_C': tempC,
+            'temperature_F': tempF,
+            'humidity': hum,
+            'pressure': pres,
+            'gas': gas
+        }
+
+        return out
+    except OSError as e:
+        print('Failed to read sensor.')
+
+
+
