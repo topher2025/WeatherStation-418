@@ -3,7 +3,7 @@
 
 from machine import Pin, I2C
 from time import sleep
-from bme680 import *
+from bme680 import BME680_I2C
 import json
 
 # RPi Pico - Pin assignment
