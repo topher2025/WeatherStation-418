@@ -6,35 +6,36 @@ import socket
 import ujson
 
 # Load json files
-with open('pins.json') as f:
+with open("pins.json") as f:
     pins = json.load(f)
 with open("host.json") as f:
     host = ujson.load(f)
 
-i2c = I2C(id=1, scl=Pin(pins['scl']), sda=Pin(pins['sda']), freq=100000)
+i2c = I2C(id=1, scl=Pin(pins["scl"]), sda=Pin(pins["sda"]), freq=100000)
 bme = BME680_I2C(i2c=i2c)
+
 
 def read_sensor():
     try:
         temp = bme.temperature
-        tempC = round(temp, 2)                             # Celsius
-        tempF = round((temp * (9 / 5) + 32), 2)            # Fahrenheit
-        hum = round(bme.humidity, 2)                       # Percent
-        pres = round(bme.pressure, 2)                      # hPa
-        gas = round(bme.gas / 1000, 2)                     # kOhms
+        tempC = round(temp, 2)  # Celsius
+        tempF = round((temp * (9 / 5) + 32), 2)  # Fahrenheit
+        hum = round(bme.humidity, 2)  # Percent
+        pres = round(bme.pressure, 2)  # hPa
+        gas = round(bme.gas / 1000, 2)  # kOhms
 
         out = {
-            'temperature_C': tempC,
-            'temperature_F': tempF,
-            'humidity': hum,
-            'pressure': pres,
-            'gas': gas
+            "temperature_C": tempC,
+            "temperature_F": tempF,
+            "humidity": hum,
+            "pressure": pres,
+            "gas": gas,
         }
 
         return out
     except OSError as e:
-        print('Failed to read sensor.')
-        return {'error': e}
+        print("Failed to read sensor.")
+        return {"error": e}
 
 
 def main():
@@ -42,7 +43,6 @@ def main():
         data = read_sensor()
         print(data)
         sleep(1)
-     
 
 
 def send_json(data, retries=3):
@@ -61,7 +61,7 @@ def send_json(data, retries=3):
 
     for i in range(retries):
         try:
-            addr = (socket.getaddrinfo(host["ip"], host["port"])[0][-1])
+            addr = socket.getaddrinfo(host["ip"], host["port"])[0][-1]
             s = socket.socket()
             s.settimeout(5)
             s.connect(addr)
@@ -94,6 +94,5 @@ def send_json(data, retries=3):
 
     return None
 
-  
-       
+
 main()
