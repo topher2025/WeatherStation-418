@@ -42,6 +42,7 @@ Responsibilities:
 
 See the sidebar for detailed documentation on:
 
+- Sensors
 - System architecture
 - Communication protocol
 - Database design

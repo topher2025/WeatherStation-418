@@ -15,6 +15,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Sensors: sensors.md
   - Architecture: architecture.md
   - Communication Protocol: communication_protocol.md
   - Database Schema: database_schema.md
