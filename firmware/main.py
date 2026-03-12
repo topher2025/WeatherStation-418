@@ -3,14 +3,14 @@
 
 from machine import Pin, I2C
 from time import sleep
-from bme680 import BME680_I2C
+from bme680 import *
 import json
 
 # RPi Pico - Pin assignment
 with open('pins.json') as f:
     pins = json.load(f)
 
-i2c = I2C(id=0, scl=Pin(pins['scl']), sda=Pin(pins['sda']))
+i2c = I2C(id=1, scl=Pin(pins['scl']), sda=Pin(pins['sda']), freq=100000)
 
 bme = BME680_I2C(i2c=i2c)
 
@@ -42,6 +42,7 @@ def main():
         data = read_sensor()
         print(data)
         sleep(1)
-        
-
+     
+     
+main()
 
