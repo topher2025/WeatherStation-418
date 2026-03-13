@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 HOST = os.getenv("WEATHER_API_HOST", "0.0.0.0")
-PORT = int(os.getenv("WEATHER_API_PORT", "443"))
+PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
 
 
 def validate_payload(payload: dict):
@@ -43,9 +43,18 @@ def log_data():
 
 @app.post("/api/s2b/update")
 def get_recent_readings():
-    data = request.get_json()
-    if validate_payload(data):
-        log_data()
+    if not request.is_json:
+        return jsonify(error="Request body must be JSON."), 415
+
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify(error="Request body must contain valid JSON."), 400
+
+    if not validate_payload(data):
+        return jsonify(error="Payload failed validation."), 422
+
+    log_data()
+    return "", 204
 
 
 
