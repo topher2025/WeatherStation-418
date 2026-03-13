@@ -25,14 +25,13 @@ def validate_payload(payload: dict):
         gas = float(gas)
     except ValueError:
         return False
-    try:
-        temperature_c = -40.0<=temperature_c<=850.0
-        temperature_f = -40.0<=temperature_f<=185.0
-        humidity = 0.0<=humidity<=100.0
-        pressure = 300.0<=pressure<=1100.0
-        gas = 0.0<=gas<=500.0
-    except ValueError:
-        return False
+
+    temperature_c = -40.0<=temperature_c<=850.0
+    temperature_f = -40.0<=temperature_f<=185.0
+    humidity = 0.0<=humidity<=100.0
+    pressure = 300.0<=pressure<=1100.0
+    gas = 0.0<=gas<=500.0
+
     if temperature_c and temperature_f and humidity and pressure and gas:
         return True
     else:
