@@ -42,7 +42,7 @@ def log_data():
 
 
 @app.post("/api/s2b/update")
-def get_recent_readings():
+def get_current_readings():
     if not request.is_json:
         return jsonify(error="Request body must be JSON."), 415
 
