@@ -26,18 +26,16 @@ def validate_payload(payload: dict):
     except ValueError:
         return False
 
-    temperature_c = -40.0<=temperature_c<=850.0
-    temperature_f = -40.0<=temperature_f<=185.0
-    humidity = 0.0<=humidity<=100.0
-    pressure = 300.0<=pressure<=1100.0
-    gas = 0.0<=gas<=500.0
+    temperature_c_b = -40.0<=temperature_c<=85.0
+    temperature_f_b = -40.0<=temperature_f<=185.0
+    humidity_b = 0.0<=humidity<=100.0
+    pressure_b = 300.0<=pressure<=1100.0
+    gas_b = 0.0<=gas<=500.0
 
-    if temperature_c and temperature_f and humidity and pressure and gas:
-        return True
-    else:
-        return False
+    return temperature_c_b and temperature_f_b and humidity_b and pressure_b and gas_b
 
-def log_data():
+
+def log_data(data: dict):
     pass
 
 
@@ -53,7 +51,7 @@ def get_current_readings():
     if not validate_payload(data):
         return jsonify(error="Payload failed validation."), 422
 
-    log_data()
+    log_data(data)
     return "", 204
 
 
