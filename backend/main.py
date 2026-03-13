@@ -41,10 +41,12 @@ def log_data(data: dict):
 
 @app.post("/api/s2b/update")
 def get_current_readings():
+
     if not request.is_json:
         return jsonify(error="Request body must be JSON."), 415
 
     data = request.get_json(silent=True)
+    print("data:  " + str(data))
     if data is None:
         return jsonify(error="Request body must contain valid JSON."), 400
 
