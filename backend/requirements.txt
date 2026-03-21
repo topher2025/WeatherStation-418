@@ -24,3 +24,6 @@ matplotlib>=3.8.0
 # Linting / dev only
 black>=23.3.0
 ruff>=0.0.300
+
+# time zone handling
+pytz>=2024.1.0
