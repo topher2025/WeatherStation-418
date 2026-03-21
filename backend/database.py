@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from datetime import datetime
-import pytz
+
 
 DB_PATH = Path("weather.db")
 
@@ -159,9 +159,21 @@ def get_all_weather():
     conn.close()
     return [dict(row) for row in rows]
 
-
 def utc_to_local(utc_dt):
-    utc_dt = datetime.fromisoformat(utc_dt.format())
-    local_tz = pytz.timezone("America/Chicago")
-    utc_dt = utc_dt.replace(tzinfo=pytz.utc)
-    return utc_dt.astimezone(local_tz)
+    import pytz
+
+    if isinstance(utc_dt, str):
+        parsed = datetime.fromisoformat(utc_dt.strip().replace("Z", "+00:00"))
+    elif isinstance(utc_dt, datetime):
+        parsed = utc_dt
+    else:
+        raise TypeError("utc_to_local expected datetime or str input")
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=pytz.utc)
+    else:
+        parsed = parsed.astimezone(pytz.utc)
+
+    return parsed.astimezone(pytz.timezone("America/Chicago"))
+
+
