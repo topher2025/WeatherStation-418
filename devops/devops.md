@@ -2,7 +2,7 @@
 
 ## Database
 
-Uses SQLite because it's simple and easy, and has enough capabilities for the project. The database file is `/weather.db`, and the python wrapper is `/backend/database.py`.
+Uses SQLite because it's simple and easy, and has enough capabilities for the project. The database file is `weather.db`, and the python wrapper is `/backend/database.py`.
 
 ### Tests
 
