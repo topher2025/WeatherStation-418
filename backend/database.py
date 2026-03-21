@@ -1,5 +1,7 @@
 import sqlite3
 from pathlib import Path
+from datetime import datetime
+import pytz
 
 DB_PATH = Path("weather.db")
 
@@ -25,7 +27,7 @@ def init_db():
             pressure REAL,
             gas_resistance REAL
         )
-    """)
+        """)
 
     conn.commit()
     conn.close()
@@ -36,10 +38,13 @@ def insert_weather(temperature, humidity, pressure, gas_resistance):
     conn = connect_db()
     cur = conn.cursor()
 
-    cur.execute("""
+    cur.execute(
+        """
         INSERT INTO weather_data (temperature, humidity, pressure, gas_resistance)
         VALUES (?, ?, ?, ?)
-    """, (temperature, humidity, pressure, gas_resistance))
+        """,
+        (temperature, humidity, pressure, gas_resistance),
+    )
 
     conn.commit()
     conn.close()
@@ -51,10 +56,10 @@ def get_latest_weather():
     cur = conn.cursor()
 
     cur.execute("""
-                SELECT * FROM weather_data
-                ORDER BY id DESC
-                LIMIT 1
-                """)
+        SELECT * FROM weather_data
+        ORDER BY id DESC
+        LIMIT 1
+        """)
 
     row = cur.fetchone()
     conn.close()
@@ -92,3 +97,67 @@ def get_hourly_weather(hours=12):
     conn.close()
 
     return [dict(row) for row in rows]
+
+
+def get_daily_weather(days=7):
+    conn = connect_db()
+    cur = conn.cursor()
+
+    try:
+        days = int(days)
+    except (TypeError, ValueError):
+        days = 7
+
+    interval = f"-{days} days"
+
+    cur.execute(
+        """
+        SELECT * FROM weather_data
+        WHERE timestamp >= datetime('now', ?)
+        ORDER BY timestamp ASC
+        """,
+        (interval,),
+    )
+
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_weekly_weather(weeks=4):
+    conn = connect_db()
+    cur = conn.cursor()
+    try:
+        weeks = int(weeks)
+    except (TypeError, ValueError):
+        weeks = 4
+    interval = f"-{weeks} weeks"
+    cur.execute(
+        """
+        SELECT * FROM weather_data
+        WHERE timestamp >= datetime('now', ?)
+        ORDER BY timestamp ASC
+        """,
+        (interval,),
+    )
+
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_all_weather():
+    conn = connect_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT * FROM weather_data
+        ORDER BY timestamp ASC
+        """)
+
+
+def utc_to_local(utc_dt):
+    utc_dt = datetime.fromisoformat(utc_dt.format())
+    local_tz = pytz.timezone("America/Chicago")
+    utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+    return utc_dt.astimezone(local_tz)
