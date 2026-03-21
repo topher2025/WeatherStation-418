@@ -155,6 +155,10 @@ def get_all_weather():
         ORDER BY timestamp ASC
         """)
 
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
 
 def utc_to_local(utc_dt):
     utc_dt = datetime.fromisoformat(utc_dt.format())
