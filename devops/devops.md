@@ -11,7 +11,7 @@ For simple tests, use `python -c` to run wrapper functions.
 
 Initialize the database and print all stored weather data:
 ```bash
-python -c "import backend.database as db; db.init(); data = db.get_all_weather(); print(data)"
+python -c "import backend.database as db; db.init_db(); data = db.get_all_weather(); print(data)"
 # Output: []
 ```
 
