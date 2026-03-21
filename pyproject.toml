@@ -9,7 +9,7 @@ requires-python = ">=3.11"
 
 [tool.black]
 line-length = 88
-extend-exclude = "firmware/bme680\.py"
+extend-exclude = "firmware/bme680\\.py"
 
 [tool.ruff]
 extend-exclude = [

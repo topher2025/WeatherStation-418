@@ -2,7 +2,6 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 
-
 DB_PATH = Path("weather.db")
 
 
@@ -125,7 +124,7 @@ def get_daily_weather(days=7):
 
 
 def get_weekly_weather(weeks=4):
-    return get_daily_weather(weeks*7)
+    return get_daily_weather(weeks * 7)
 
 
 def get_all_weather():
@@ -140,6 +139,7 @@ def get_all_weather():
     rows = cur.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
 
 def utc_to_local(utc_dt):
     import pytz
@@ -157,5 +157,3 @@ def utc_to_local(utc_dt):
         parsed = parsed.astimezone(pytz.utc)
 
     return parsed.astimezone(pytz.timezone("America/Chicago"))
-
-
