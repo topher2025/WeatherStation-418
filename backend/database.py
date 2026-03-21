@@ -125,25 +125,7 @@ def get_daily_weather(days=7):
 
 
 def get_weekly_weather(weeks=4):
-    conn = connect_db()
-    cur = conn.cursor()
-    try:
-        weeks = int(weeks)
-    except (TypeError, ValueError):
-        weeks = 4
-    interval = f"-{weeks} weeks"
-    cur.execute(
-        """
-        SELECT * FROM weather_data
-        WHERE timestamp >= datetime('now', ?)
-        ORDER BY timestamp ASC
-        """,
-        (interval,),
-    )
-
-    rows = cur.fetchall()
-    conn.close()
-    return [dict(row) for row in rows]
+    return get_daily_weather(weeks*7)
 
 
 def get_all_weather():
