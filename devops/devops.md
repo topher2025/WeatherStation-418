@@ -18,4 +18,6 @@ python -c "import backend.database as db; db.init_db(); data = db.get_all_weathe
 Insert a new weather data point and print the latest weather data:
 ```bash
 python -c "import backend.database as db; db.insert_weather(37.7, 13.5, 700.6, 265.2); data = db.get_latest_weather(); print(data)"
-# Output: {'id': 1, 'timestamp': '2026-03-21 19:13:03', 'temperature': 37.7, 'humidity': 13.5, 'pressure': 700.6, 'gas_resistance': 265.2}```
+# Output: {'id': 1, 'timestamp': '2026-03-21 19:13:03', 'temperature': 37.7, 'humidity': 13.5, 'pressure': 700.6, 'gas_resistance': 265.2}
+```
+
