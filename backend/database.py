@@ -1,4 +1,5 @@
 import sqlite3
+from contextlib import contextmanager
 from pathlib import Path
 from datetime import datetime
 
@@ -6,62 +7,63 @@ DB_PATH = Path("weather.db")
 
 
 # Connect to database
+@contextmanager
 def connect_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row  # lets you access columns by name
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 # Initialize database (create table if not exists)
 def init_db():
-    conn = connect_db()
-    cur = conn.cursor()
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS weather_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            temperature REAL,
-            humidity REAL,
-            pressure REAL,
-            gas_resistance REAL
-        )
-        """)
-
-    conn.commit()
-    conn.close()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS weather_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                temperature REAL,
+                humidity REAL,
+                pressure REAL,
+                gas_resistance REAL
+            )
+            """)
 
 
 # Insert weather data
 def insert_weather(temperature, humidity, pressure, gas_resistance):
-    conn = connect_db()
-    cur = conn.cursor()
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    cur.execute(
-        """
-        INSERT INTO weather_data (temperature, humidity, pressure, gas_resistance)
-        VALUES (?, ?, ?, ?)
-        """,
-        (temperature, humidity, pressure, gas_resistance),
-    )
-
-    conn.commit()
-    conn.close()
+        cur.execute(
+            """
+            INSERT INTO weather_data (temperature, humidity, pressure, gas_resistance)
+            VALUES (?, ?, ?, ?)
+            """,
+            (temperature, humidity, pressure, gas_resistance),
+        )
 
 
 # Get latest weather entry
 def get_latest_weather():
-    conn = connect_db()
-    cur = conn.cursor()
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    cur.execute("""
-        SELECT * FROM weather_data
-        ORDER BY id DESC
-        LIMIT 1
-        """)
+        cur.execute("""
+            SELECT * FROM weather_data
+            ORDER BY id DESC
+            LIMIT 1
+            """)
 
-    row = cur.fetchone()
-    conn.close()
+        row = cur.fetchone()
 
     if row is None:
         return None
@@ -70,11 +72,8 @@ def get_latest_weather():
 
 
 def get_hourly_weather(hours=12):
-    conn = connect_db()
-    cur = conn.cursor()
-
     try:
-        hours = int(hours)
+        hours = abs(int(hours))
     except (TypeError, ValueError):
         hours = 12
 
@@ -83,61 +82,67 @@ def get_hourly_weather(hours=12):
 
     interval = f"-{hours} hours"
 
-    cur.execute(
-        """
-        SELECT * FROM weather_data
-        WHERE timestamp >= datetime('now', ?)
-        ORDER BY timestamp ASC
-        """,
-        (interval,),
-    )
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    rows = cur.fetchall()
-    conn.close()
+        cur.execute(
+            """
+            SELECT * FROM weather_data
+            WHERE timestamp >= datetime('now', ?)
+            ORDER BY timestamp ASC
+            """,
+            (interval,),
+        )
+
+        rows = cur.fetchall()
 
     return [dict(row) for row in rows]
 
 
 def get_daily_weather(days=7):
-    conn = connect_db()
-    cur = conn.cursor()
-
     try:
-        days = int(days)
+        days = abs(int(days))
     except (TypeError, ValueError):
         days = 7
 
     interval = f"-{days} days"
 
-    cur.execute(
-        """
-        SELECT * FROM weather_data
-        WHERE timestamp >= datetime('now', ?)
-        ORDER BY timestamp ASC
-        """,
-        (interval,),
-    )
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    rows = cur.fetchall()
-    conn.close()
+        cur.execute(
+            """
+            SELECT * FROM weather_data
+            WHERE timestamp >= datetime('now', ?)
+            ORDER BY timestamp ASC
+            """,
+            (interval,),
+        )
+
+        rows = cur.fetchall()
+
     return [dict(row) for row in rows]
 
 
 def get_weekly_weather(weeks=4):
+    try:
+        weeks = abs(int(weeks))
+    except (TypeError, ValueError):
+        weeks = 4
     return get_daily_weather(weeks * 7)
 
 
 def get_all_weather():
-    conn = connect_db()
-    cur = conn.cursor()
+    with connect_db() as conn:
+        cur = conn.cursor()
 
-    cur.execute("""
-        SELECT * FROM weather_data
-        ORDER BY timestamp ASC
-        """)
+        cur.execute("""
+            SELECT * FROM weather_data
+            ORDER BY timestamp ASC
+            """)
 
-    rows = cur.fetchall()
-    conn.close()
+        rows = cur.fetchall()
+
     return [dict(row) for row in rows]
 
 

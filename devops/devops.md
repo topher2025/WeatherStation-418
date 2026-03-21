@@ -2,11 +2,11 @@
 
 ## Database
 
-Uses SQLite because it's simple and easy, and has enough capabilities for the project. The database file is `weather.db`, and the python wrapper is `/backend/database.py`.
+Uses SQLite because it's simple and easy, and has enough capabilities for the project. The database file is `weather.db`, and the python wrapper is `backend/database.py`.
 
 ### Tests
 
-For simple tests, use `python -c` to run wrapper functions.
+For simple tests, use `python -c` to run wrapper functions The following examples are run from the project root, change the import statement to fit specific locations.
 
 
 Initialize the database and print all stored weather data:
