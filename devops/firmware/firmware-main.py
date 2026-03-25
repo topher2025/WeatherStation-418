@@ -18,9 +18,9 @@ def read_sensor():
     try:
         tempC = randint(20, 70)  # Celsius
         tempF = round((tempC * (9 / 5) + 32), 2)  # Fahrenheit
-        hum = randint(0,100)  # Percent
-        pres = randint(300,1100)  # hPa
-        gas = randint(0,500)  # kOhms
+        hum = randint(0, 100)  # Percent
+        pres = randint(300, 1100)  # hPa
+        gas = randint(0, 500)  # kOhms
 
         out = {
             "temperature_C": tempC,
@@ -92,6 +92,7 @@ def send_json(data, retries=3):
                 s.close()
 
     return None
+
 
 if __name__ == "__main__":
     main()

@@ -95,5 +95,6 @@ def send_json(data, retries=3):
 
     return None
 
+
 if __name__ == "__main__":
     main()

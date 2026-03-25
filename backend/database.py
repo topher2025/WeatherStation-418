@@ -169,7 +169,7 @@ def get_data_point_count():
 
         row = cur.fetchone()
 
-    return row['count'] if row else 0
+    return row["count"] if row else 0
 
 
 def create_user_if_missing(username, password_hash, is_active=1):
@@ -242,12 +242,16 @@ def logout_session(username):
             (username,),
         )
         print(f"[DB] UPDATE executed - rows affected: {cur.rowcount}")
-        
+
         # Verify the update worked
-        cur.execute("SELECT username, session_id FROM users WHERE username = ?", (username,))
+        cur.execute(
+            "SELECT username, session_id FROM users WHERE username = ?", (username,)
+        )
         row = cur.fetchone()
         if row:
-            print(f"[DB] ✓ User {row['username']} session_id is now: {row['session_id']}")
+            print(
+                f"[DB] ✓ User {row['username']} session_id is now: {row['session_id']}"
+            )
         else:
             print(f"[DB] ✗ User {username} not found in database")
 
