@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🌦️ Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="nav-link">Dashboard</a></li>
+                <li><a href="/history" class="nav-link">History</a></li>
+                <li><a href="/settings" class="nav-link active">Settings</a></li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard">
+            <!-- General Settings Card -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2 class="card-title">
+                    <span class="card-title-icon">⚙️</span>
+                    Settings
+                </h2>
+
+                <div class="settings-container">
+                    <!-- Display Settings -->
+                    <div class="settings-section">
+                        <h3 class="settings-subtitle">Display Settings</h3>
+
+                        <div class="settings-group">
+                            <label for="theme-select" class="settings-label">Theme</label>
+                            <select id="theme-select" class="settings-input">
+                                <option value="dark" selected>Dark (Default)</option>
+                                <option value="light">Light</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="temp-unit" class="settings-label">Temperature Unit</label>
+                            <select id="temp-unit" class="settings-input">
+                                <option value="celsius" selected>Celsius (°C)</option>
+                                <option value="fahrenheit">Fahrenheit (°F)</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="refresh-interval" class="settings-label">Auto-Refresh Interval (seconds)</label>
+                            <input type="number" id="refresh-interval" class="settings-input" value="5" min="1" max="60">
+                        </div>
+                    </div>
+
+                    <!-- Sensor Settings -->
+                    <div class="settings-section">
+                        <h3 class="settings-subtitle">Sensor Settings</h3>
+
+                        <div class="settings-group">
+                            <label for="altitude-input" class="settings-label">Altitude (m)</label>
+                            <input type="number" id="altitude-input" class="settings-input" value="0" step="0.1">
+                        </div>
+
+                        <div class="settings-group">
+                            <label for="calibration-select" class="settings-label">Calibration Status</label>
+                            <select id="calibration-select" class="settings-input" disabled>
+                                <option value="calibrated" selected>Calibrated</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- System Information -->
+                    <div class="settings-section">
+                        <h3 class="settings-subtitle">System Information</h3>
+
+                        <div class="settings-info-group">
+                            <div class="settings-info-item">
+                                <span class="settings-info-label">Firmware Version:</span>
+                                <span class="settings-info-value" id="firmware-version">Loading...</span>
+                            </div>
+                            <div class="settings-info-item">
+                                <span class="settings-info-label">Last Connection:</span>
+                                <span class="settings-info-value" id="last-connection">Loading...</span>
+                            </div>
+                            <div class="settings-info-item">
+                                <span class="settings-info-label">Uptime:</span>
+                                <span class="settings-info-value" id="uptime">Loading...</span>
+                            </div>
+                            <div class="settings-info-item">
+                                <span class="settings-info-label">Total Data Points:</span>
+                                <span class="settings-info-value" id="data-points">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="settings-section">
+                        <h3 class="settings-subtitle">Actions</h3>
+
+                        <div class="settings-buttons">
+                            <button id="save-settings-btn" class="btn btn-primary">Save Settings</button>
+                            <button id="reset-settings-btn" class="btn btn-secondary">Reset to Default</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="/static/settings.js"></script>
+    <script src="/static/logout.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Weather Station Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🌦️ Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" class="nav-link">History</a></li>
+                <li><a href="#" class="nav-link">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="/static/index.js"></script>
+</body>
+</html>
+
