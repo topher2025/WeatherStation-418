@@ -141,7 +141,8 @@ def login_page():
             return (
                 render_template(
                     "login.html",
-                    error="This account is already logged in on another device. Please log out from the other session first.",
+                    error="This account is already logged in on another device."
+                          " Please log out from the other session first.",
                     next_target=next_target,
                 ),
                 409,
