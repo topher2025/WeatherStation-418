@@ -1,28 +1,26 @@
-from machine import Pin, I2C
 from time import sleep
-from bme680 import BME680_I2C
 import json
 import socket
-import ujson
+import os
+
+from random import randint
 
 # Load json files
-with open("pins.json") as f:
-    pins = json.load(f)
-with open("host.json") as f:
-    host = ujson.load(f)
 
-i2c = I2C(id=1, scl=Pin(pins["scl"]), sda=Pin(pins["sda"]), freq=100000)
-bme = BME680_I2C(i2c=i2c)
+with open("host.json") as f:
+    host = json.load(f)
+
+host["ip"] = os.getenv("WEATHER_API_HOST", host.get("ip", "backend"))
+host["port"] = int(os.getenv("WEATHER_API_PORT", str(host.get("port", 4430))))
 
 
 def read_sensor():
     try:
-        temp = bme.temperature
-        tempC = round(temp, 2)  # Celsius
-        tempF = round((temp * (9 / 5) + 32), 2)  # Fahrenheit
-        hum = round(bme.humidity, 2)  # Percent
-        pres = round(bme.pressure, 2)  # hPa
-        gas = round(bme.gas / 1000, 2)  # kOhms
+        tempC = randint(20, 70)  # Celsius
+        tempF = round((tempC * (9 / 5) + 32), 2)  # Fahrenheit
+        hum = randint(0, 100)  # Percent
+        pres = randint(300, 1100)  # hPa
+        gas = randint(0, 500)  # kOhms
 
         out = {
             "temperature_C": tempC,
@@ -47,7 +45,7 @@ def main():
 
 
 def send_json(data, retries=3):
-    payload = ujson.dumps(data)
+    payload = json.dumps(data)
     s = None
 
     request = (

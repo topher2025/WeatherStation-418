@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather History - Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🌦️ Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="nav-link">Dashboard</a></li>
+                <li><a href="/history" class="nav-link active">History</a></li>
+                <li><a href="/settings" class="nav-link">Settings</a></li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard">
+            <!-- Historical Data Card -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📊</span>
+                    Weather History
+                </h2>
+
+                <div class="history-container" id="history-container">
+                    <div class="loading">Loading historical data...</div>
+                </div>
+            </div>
+
+            <!-- Temperature History Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🌡️</span>
+                    Temperature Trends
+                </h2>
+                <div class="trends-container">
+                    <div class="trend-item">
+                        <div class="trend-label">24h Average</div>
+                        <div id="temp-24h-avg" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h High</div>
+                        <div id="temp-24h-high" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h Low</div>
+                        <div id="temp-24h-low" class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Humidity History Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">💧</span>
+                    Humidity Trends
+                </h2>
+                <div class="trends-container">
+                    <div class="trend-item">
+                        <div class="trend-label">24h Average</div>
+                        <div id="humidity-24h-avg" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h High</div>
+                        <div id="humidity-24h-high" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h Low</div>
+                        <div id="humidity-24h-low" class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pressure History Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🔽</span>
+                    Pressure Trends
+                </h2>
+                <div class="trends-container">
+                    <div class="trend-item">
+                        <div class="trend-label">24h Average</div>
+                        <div id="pressure-24h-avg" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h High</div>
+                        <div id="pressure-24h-high" class="loading">Loading...</div>
+                    </div>
+                    <div class="trend-item">
+                        <div class="trend-label">24h Low</div>
+                        <div id="pressure-24h-low" class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="/static/history.js"></script>
+    <script src="/static/logout.js"></script>
+</body>
+</html>
+

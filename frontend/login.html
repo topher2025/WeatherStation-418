@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class="auth-wrapper">
+        <section class="auth-card">
+            <h1 class="auth-title">Weather Station Login</h1>
+            <p class="auth-subtitle">Sign in to access the dashboard and APIs.</p>
+
+            {% if error %}
+            <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" action="/login" class="auth-form">
+                <input type="hidden" name="next" value="{{ next_target }}">
+
+                <label for="username" class="settings-label">Username</label>
+                <input id="username" name="username" class="settings-input" type="text" required autocomplete="username">
+
+                <label for="password" class="settings-label">Password</label>
+                <input id="password" name="password" class="settings-input" type="password" required autocomplete="current-password">
+
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+
+            <p class="auth-help">Accounts: <code>ops1</code>, <code>ops2</code>, <code>ops3</code>, <code>ops4</code>, <code>ops5</code>.</p>
+        </section>
+    </main>
+</body>
+</html>
+
+

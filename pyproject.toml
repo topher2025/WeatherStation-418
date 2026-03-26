@@ -16,4 +16,4 @@ extend-exclude = [
     "firmware/bme680.py"
 ]
 line-length = 88
-select = ["E", "F", "W"]
+lint.select = ["E", "F", "W"]

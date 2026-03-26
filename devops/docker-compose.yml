@@ -1,0 +1,32 @@
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: devops/backend/Dockerfile
+    ports:
+      - "4430:4430"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4430/login', timeout=3)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - weather-net
+
+  pico:
+    build:
+      context: ..
+      dockerfile: devops/firmware/Dockerfile
+    environment:
+      WEATHER_API_HOST: backend
+      WEATHER_API_PORT: "4430"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - weather-net
+
+networks:
+  weather-net:

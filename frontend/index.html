@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🌦️ Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="nav-link active">Dashboard</a></li>
+                <li><a href="/history" class="nav-link">History</a></li>
+                <li><a href="/settings" class="nav-link">Settings</a></li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard">
+            <!-- Current Weather Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🌡️</span>
+                    Current
+                </h2>
+
+                <div class="weather-grid">
+                    <!-- Temperature Large Display -->
+                    <div class="large-display" id="current-temp">
+                        <div class="weather-label">Temperature</div>
+                        <div class="weather-value">--</div>
+                        <div class="weather-unit">°C</div>
+                    </div>
+
+                    <!-- Humidity -->
+                    <div class="weather-item" id="current-humidity">
+                        <div class="weather-label">Hum</div>
+                        <div class="weather-value">--</div>
+                        <div class="weather-unit">%</div>
+                    </div>
+
+                    <!-- Pressure -->
+                    <div class="weather-item" id="current-pressure">
+                        <div class="weather-label">Press</div>
+                        <div class="weather-value">--</div>
+                        <div class="weather-unit">hPa</div>
+                    </div>
+
+                    <!-- Gas Resistance -->
+                    <div class="weather-item" id="current-gas">
+                        <div class="weather-label">Gas</div>
+                        <div class="weather-value">--</div>
+                        <div class="weather-unit">Ω</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Trends Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📊</span>
+                    Trends (24h)
+                </h2>
+
+                <div class="trends-container" id="trends-container">
+                    <!-- Temperature Trend -->
+                    <div class="trend-item">
+                        <div class="trend-label">Temp</div>
+                        <div id="temp-trend" class="loading">Loading data</div>
+                    </div>
+
+                    <!-- Humidity Trend -->
+                    <div class="trend-item">
+                        <div class="trend-label">Hum</div>
+                        <div id="humidity-trend" class="loading">Loading data</div>
+                    </div>
+
+                    <!-- Pressure Trend -->
+                    <div class="trend-item">
+                        <div class="trend-label">Press</div>
+                        <div id="pressure-trend" class="loading">Loading data</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📈</span>
+                    Stats (24h)
+                </h2>
+
+                <div class="trends-container">
+                    <div class="trend-item">
+                        <div class="trend-label">Temp High</div>
+                        <div id="stat-temp-high" class="loading">Loading...</div>
+                    </div>
+
+                    <div class="trend-item">
+                        <div class="trend-label">Temp Low</div>
+                        <div id="stat-temp-low" class="loading">Loading...</div>
+                    </div>
+
+                    <div class="trend-item">
+                        <div class="trend-label">Avg Humidity</div>
+                        <div id="stat-humidity-avg" class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">⚙️</span>
+                    System
+                </h2>
+
+                <div class="trends-container">
+
+                    <div class="trend-item">
+                        <div class="trend-label">Connection</div>
+                        <div class="trend-bar">
+                            <div class="trend-bar-fill" style="width: 100%; background: linear-gradient(90deg, #27ae60, #229954);">Connected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="/static/index.js"></script>
+    <script src="/static/logout.js"></script>
+</body>
+</html>
