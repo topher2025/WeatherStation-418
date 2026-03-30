@@ -55,7 +55,7 @@ def _wrap_socket_with_ssl(sock):
             return context.wrap_socket(sock, server_hostname=host["ip"])
     except (AttributeError, Exception):
         pass
-    
+
     # Fallback for MicroPython or older Python versions
     try:
         return ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
@@ -67,7 +67,7 @@ def _wrap_socket_with_ssl(sock):
 def send_json(data, retries=3):
     payload = json.dumps(data)
     s = None
-    
+
     request = (
         "POST {} HTTP/1.1\r\n"
         "Host: {}\r\n"
@@ -86,7 +86,7 @@ def send_json(data, retries=3):
 
             # Wrap socket with SSL/TLS (compatible with Python 3.10+ and MicroPython)
             s = _wrap_socket_with_ssl(s)
-            
+
             s.connect(addr)
             s.sendall(request.encode())
 

@@ -75,10 +75,10 @@ def send_json(data, retries=3):
             addr = socket.getaddrinfo(host["ip"], host["port"])[0][-1]
             s = socket.socket()
             s.settimeout(5)
-            
+
             # Wrap socket with SSL/TLS
             s = _wrap_socket_with_ssl(s)
-            
+
             s.connect(addr)
             s.sendall(request.encode())
 

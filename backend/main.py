@@ -298,4 +298,8 @@ if __name__ == "__main__":
     _bootstrap_auth_accounts()
     cert_path = os.path.join(os.path.dirname(__file__), "cert.pem")
     key_path = os.path.join(os.path.dirname(__file__), "key.pem")
-    app.run(host=HOST, port=PORT, debug=True, ssl_context=(cert_path, key_path), threaded=True)
+    app.run(host=HOST,
+            port=PORT,
+            debug=True,
+            ssl_context=(cert_path, key_path),
+            threaded=True)
