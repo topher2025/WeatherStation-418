@@ -17,6 +17,9 @@ app.config["SECRET_KEY"] = os.getenv(
 
 HOST = os.getenv("WEATHER_API_HOST", "0.0.0.0")
 PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
+SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(
+    os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "8")
+)
 
 # Five hardcoded users (passwords must be changed in database only)
 HARDCODED_ACCOUNTS = {
@@ -67,34 +70,39 @@ def _bootstrap_auth_accounts(force_update=False):
     _AUTH_BOOTSTRAPPED = True
 
 
+def _expire_stale_user_sessions():
+    db.expire_stale_sessions(SESSION_HEARTBEAT_TIMEOUT_SECONDS)
+
+
 @app.before_request
 def enforce_authentication():
     public_endpoints = {"login", "logout"}
     unprotected_api_prefixes = ("/api/s2b/", "/api/b2f/")
 
     if request.endpoint == "static" or request.path.startswith("/static/"):
-        print("static")
         return
 
+    _expire_stale_user_sessions()
+
     if request.endpoint in public_endpoints:
-        print("public")
         return
 
     if request.path.startswith(unprotected_api_prefixes):
-        print("unprotected")
         return
 
     if session.get("authenticated"):
-        print("authenticated")
-        return
+        username = session.get("username")
+        session_id = session.get("session_id")
+        if db.is_session_active(username, session_id):
+            return
+
+        # Session is stale or replaced by another login; force re-authentication.
+        session.clear()
 
     if request.path.startswith("/api/"):
-        print("auth-req api")
         return jsonify(error="Authentication required."), 401
 
     next_target = request.full_path if request.query_string else request.path
-    print("other")
-    print(next_target)
     return redirect(url_for("login", next=next_target))
 
 
@@ -185,39 +193,19 @@ def login():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    print("\n=== LOGOUT ROUTE CALLED ===")
-    print(f"Request method: {request.method}")
-    print(f"Request path: {request.path}")
-
     username = session.get("username")
-    session_id = session.get("session_id")
-    print(f"Current session username: {username}")
-    print(f"Current session_id: {session_id}")
 
     if username:
-        print(f"Clearing session for user: {username}")
         try:
             db.logout_session(username)
-            print(f"✓ Database logout_session() completed for {username}")
-        except Exception as e:
-            print(f"✗ Error calling logout_session: {e}")
-    else:
-        print("No username in session - user may not be logged in")
+        except Exception:
+            pass
 
     session.clear()
-    print("✓ Flask session cleared")
-
-    # If this is a sendBeacon request (from beforeunload), return 200 OK
-    # Otherwise redirect to login page
-    is_beacon = request.method == "POST" and not request.form and not request.is_json
-    print(f"Is beacon request: {is_beacon}")
-
-    if is_beacon:
-        print("Returning 200 OK for beacon request")
+    if request.method == "POST":
         return "", 200
-
-    print("Redirecting to login page")
     return redirect(url_for("login"))
+
 
 
 @app.get("/history")
@@ -280,6 +268,30 @@ def get_system_info():
             "data_points": db.get_data_point_count(),
         }
     )
+
+
+@app.post("/api/b2f/user")
+def user():
+    _expire_stale_user_sessions()
+
+    if not session.get("authenticated"):
+        return jsonify(error="Authentication required."), 401
+
+    username = session.get("username")
+    session_id = session.get("session_id")
+    if not db.is_session_active(username, session_id):
+        session.clear()
+        return jsonify(error="Session expired."), 401
+
+    if not db.touch_session_heartbeat(username, session_id):
+        session.clear()
+        return jsonify(error="Session expired."), 401
+
+
+    return "", 204
+
+
+
 
 
 if __name__ == "__main__":
