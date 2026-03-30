@@ -1,0 +1,20 @@
+# SSL Certificates (not committed to version control)
+
+To generate self-signed SSL certificates for development:
+
+```bash
+cd backend
+python generate_certs.py
+```
+
+This will create:
+- `cert.pem` - SSL certificate (public)
+- `key.pem` - SSL private key (secret)
+
+These are in `.gitignore` and should NEVER be committed to Git.
+
+For production, replace these with:
+1. Let's Encrypt certificates
+2. Commercial CA certificates
+3. Or use a proper certificate management system
+

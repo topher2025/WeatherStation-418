@@ -173,7 +173,17 @@ def get_data_point_count():
 
 
 def create_user_if_missing(username, password_hash, is_active=1):
-    pass
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO users (username, password_hash, is_active, session_id)
+            VALUES (?, ?, ?, NULL)
+            ON CONFLICT(username) DO NOTHING
+            """,
+            (username, password_hash, is_active),
+        )
+        return cur.rowcount == 1
 
 
 def upsert_user_password(username, password_hash, is_active=1):

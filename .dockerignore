@@ -1,0 +1,9 @@
+# Ignore junk
+.git
+.gitignore
+.idea
+**/__pycache__/
+**/*.pyc
+
+# Ignore local data
+*.db

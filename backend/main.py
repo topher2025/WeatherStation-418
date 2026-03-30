@@ -52,34 +52,50 @@ def _bootstrap_auth_accounts(force_update=False):
     db.init_db()
 
     for username, plain_password in HARDCODED_ACCOUNTS.items():
-        password_hash = generate_password_hash(plain_password)
-        db.upsert_user_password(username, password_hash, is_active=1)
+        if force_update:
+            password_hash = generate_password_hash(plain_password)
+            db.upsert_user_password(username, password_hash, is_active=1)
+            continue
+
+        # Only hash when account is first created; avoids expensive startup work
+        # and preserves password changes that were made directly in the database.
+        existing_user = db.get_user_auth(username)
+        if existing_user is None:
+            password_hash = generate_password_hash(plain_password)
+            db.create_user_if_missing(username, password_hash, is_active=1)
 
     _AUTH_BOOTSTRAPPED = True
 
 
 @app.before_request
 def enforce_authentication():
-    public_endpoints = {"login_page", "logout"}
+    public_endpoints = {"login", "logout"}
     unprotected_api_prefixes = ("/api/s2b/", "/api/b2f/")
 
     if request.endpoint == "static" or request.path.startswith("/static/"):
+        print("static")
         return
 
     if request.endpoint in public_endpoints:
+        print("public")
         return
 
     if request.path.startswith(unprotected_api_prefixes):
+        print("unprotected")
         return
 
     if session.get("authenticated"):
+        print("authenticated")
         return
 
     if request.path.startswith("/api/"):
+        print("auth-req api")
         return jsonify(error="Authentication required."), 401
 
     next_target = request.full_path if request.query_string else request.path
-    return redirect(url_for("login_page", next=next_target))
+    print("other")
+    print(next_target)
+    return redirect(url_for("login", next=next_target))
 
 
 def validate_payload(payload: dict):
@@ -121,7 +137,7 @@ def index():
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login_page():
+def login():
     if request.method == "GET":
         if session.get("authenticated"):
             return redirect(url_for("index"))
@@ -201,7 +217,7 @@ def logout():
         return "", 200
 
     print("Redirecting to login page")
-    return redirect(url_for("login_page"))
+    return redirect(url_for("login"))
 
 
 @app.get("/history")
@@ -268,4 +284,6 @@ def get_system_info():
 
 if __name__ == "__main__":
     _bootstrap_auth_accounts()
-    app.run(host=HOST, port=PORT, debug=False)
+    cert_path = os.path.join(os.path.dirname(__file__), "cert.pem")
+    key_path = os.path.join(os.path.dirname(__file__), "key.pem")
+    app.run(host=HOST, port=PORT, debug=True, ssl_context=(cert_path, key_path), threaded=True)
