@@ -18,7 +18,7 @@ app.config["SECRET_KEY"] = os.getenv(
 HOST = os.getenv("WEATHER_API_HOST", "0.0.0.0")
 PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
 SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(
-    os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "8")
+    os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15")
 )
 
 # Five hardcoded users (passwords must be changed in database only)
@@ -77,7 +77,7 @@ def _expire_stale_user_sessions():
 @app.before_request
 def enforce_authentication():
     public_endpoints = {"login", "logout"}
-    unprotected_api_prefixes = ("/api/s2b/", "/api/b2f/")
+    unprotected_api_prefixes = ("/api/s2b/",)
 
     if request.endpoint == "static" or request.path.startswith("/static/"):
         return
@@ -300,6 +300,5 @@ if __name__ == "__main__":
     key_path = os.path.join(os.path.dirname(__file__), "key.pem")
     app.run(host=HOST,
             port=PORT,
-            debug=True,
             ssl_context=(cert_path, key_path),
             threaded=True)

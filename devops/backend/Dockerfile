@@ -9,4 +9,4 @@ COPY frontend/static ./frontend/static
 
 RUN pip install -r ./backend/requirements.txt
 
-CMD sh -c "python ./backend/generate_certs.py; python ./backend/main.py"
+CMD sh -c "[ -f ./backend/cert.pem ] && [ -f ./backend/key.pem ] || python ./backend/generate_certs.py; python ./backend/main.py"

@@ -23,10 +23,9 @@ python main.py
 The server will run on `https://0.0.0.0:4430` (or whatever port is configured in `WEATHER_API_PORT`).
 
 ### Updating Certificates
-When the certificates expire, regenerate them:
+When the certificates expire, regenerate them (from the root project directory):
 
 ```bash
-cd backend
 python generate_certs.py
 ```
 
