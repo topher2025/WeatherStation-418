@@ -7,7 +7,7 @@ services:
     ports:
       - "4430:4430"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4430/login', timeout=3)"]
+      test: ["CMD", "python", "-c", "import urllib.request, ssl; ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE; urllib.request.urlopen('https://localhost:4430/login', context=ctx, timeout=3)"]
       interval: 5s
       timeout: 3s
       retries: 10

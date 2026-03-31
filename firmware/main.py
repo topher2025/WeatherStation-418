@@ -4,6 +4,7 @@ from bme680 import BME680_I2C
 import json
 import socket
 import ujson
+import ssl
 
 # Load json files
 with open("pins.json") as f:
@@ -46,6 +47,15 @@ def main():
         sleep(5)
 
 
+def _wrap_socket_with_ssl(sock):
+    """Wrap socket with SSL/TLS for MicroPython"""
+    try:
+        return ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
+    except TypeError:
+        # Some MicroPython versions don't accept cert_reqs as keyword
+        return ssl.wrap_socket(sock)
+
+
 def send_json(data, retries=3):
     payload = ujson.dumps(data)
     s = None
@@ -65,6 +75,10 @@ def send_json(data, retries=3):
             addr = socket.getaddrinfo(host["ip"], host["port"])[0][-1]
             s = socket.socket()
             s.settimeout(5)
+
+            # Wrap socket with SSL/TLS
+            s = _wrap_socket_with_ssl(s)
+
             s.connect(addr)
             s.sendall(request.encode())
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 
 DB_PATH = Path("weather.db")
+_USER_COLUMNS_READY = False
 
 
 # Connect to database
@@ -48,6 +49,25 @@ def init_db():
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
             """)
+
+    _ensure_user_columns()
+
+
+def _ensure_user_columns():
+    global _USER_COLUMNS_READY
+    if _USER_COLUMNS_READY:
+        return
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(users)")
+        existing_columns = {row["name"] for row in cur.fetchall()}
+
+        if "last_heartbeat_at" not in existing_columns:
+            cur.execute("ALTER TABLE users ADD COLUMN last_heartbeat_at DATETIME")
+
+    _USER_COLUMNS_READY = True
+
 
 
 # Insert weather data
@@ -173,7 +193,17 @@ def get_data_point_count():
 
 
 def create_user_if_missing(username, password_hash, is_active=1):
-    pass
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO users (username, password_hash, is_active, session_id)
+            VALUES (?, ?, ?, NULL)
+            ON CONFLICT(username) DO NOTHING
+            """,
+            (username, password_hash, is_active),
+        )
+        return cur.rowcount == 1
 
 
 def upsert_user_password(username, password_hash, is_active=1):
@@ -216,12 +246,15 @@ def get_user_auth(username):
 
 def login_session(username, session_id):
     """Mark user as logged in with given session ID"""
+    _ensure_user_columns()
     with connect_db() as conn:
         cur = conn.cursor()
         cur.execute(
             """
             UPDATE users
-            SET session_id = ?, updated_at = CURRENT_TIMESTAMP
+            SET session_id = ?,
+                last_heartbeat_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
             WHERE username = ?
             """,
             (session_id, username),
@@ -230,30 +263,19 @@ def login_session(username, session_id):
 
 def logout_session(username):
     """Mark user as logged out by clearing session ID"""
-    print(f"\n[DB] logout_session called for user: {username}")
+    _ensure_user_columns()
     with connect_db() as conn:
         cur = conn.cursor()
         cur.execute(
             """
             UPDATE users
-            SET session_id = NULL, updated_at = CURRENT_TIMESTAMP
+            SET session_id = NULL,
+                last_heartbeat_at = NULL,
+                updated_at = CURRENT_TIMESTAMP
             WHERE username = ?
             """,
             (username,),
         )
-        print(f"[DB] UPDATE executed - rows affected: {cur.rowcount}")
-
-        # Verify the update worked
-        cur.execute(
-            "SELECT username, session_id FROM users WHERE username = ?", (username,)
-        )
-        row = cur.fetchone()
-        if row:
-            print(
-                f"[DB] ✓ User {row['username']} session_id is now: {row['session_id']}"
-            )
-        else:
-            print(f"[DB] ✗ User {username} not found in database")
 
 
 def is_user_logged_in_elsewhere(username, current_session_id):
@@ -277,6 +299,76 @@ def is_user_logged_in_elsewhere(username, current_session_id):
     if stored_session_id is None:
         return False
     return stored_session_id != current_session_id
+
+
+def expire_stale_sessions(timeout_seconds=8):
+    """Clear sessions with no heartbeat inside timeout window."""
+    _ensure_user_columns()
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE users
+            SET session_id = NULL,
+                last_heartbeat_at = NULL,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE session_id IS NOT NULL
+              AND (
+                  last_heartbeat_at IS NULL
+                  OR last_heartbeat_at <= datetime('now', ?)
+              )
+            """,
+            (f"-{int(timeout_seconds)} seconds",),
+        )
+        return cur.rowcount
+
+
+def touch_session_heartbeat(username, session_id):
+    """Refresh heartbeat timestamp for an active session."""
+    _ensure_user_columns()
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE users
+            SET last_heartbeat_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE username = ?
+              AND session_id = ?
+            """,
+            (username, session_id),
+        )
+        return cur.rowcount > 0
+
+
+def get_user_session_id(username):
+    """Return the currently stored session id for a user."""
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT session_id FROM users
+            WHERE username = ?
+            LIMIT 1
+            """,
+            (username,),
+        )
+        row = cur.fetchone()
+
+    if row is None:
+        return None
+
+    return row["session_id"]
+
+
+def is_session_active(username, session_id):
+    """True when the provided session id matches the active DB session."""
+    if not username or not session_id:
+        return False
+
+    stored_session_id = get_user_session_id(username)
+    return stored_session_id is not None and stored_session_id == session_id
+
 
 
 def utc_to_local(utc_dt):

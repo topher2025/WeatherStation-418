@@ -32,6 +32,11 @@ MANIFEST
 *.manifest
 *.spec
 
+# SSL/TLS Certificates (regenerate with generate_certs.py)
+*.pem
+backend/cert.pem
+backend/key.pem
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

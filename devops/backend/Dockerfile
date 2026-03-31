@@ -2,9 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY backend/ ./backend
-COPY frontend/ ./frontend
+COPY backend/*.py ./backend/
+COPY backend/requirements.txt ./backend/
+COPY frontend/*.html ./frontend/
+COPY frontend/static ./frontend/static
 
-RUN pip install -r backend/requirements.txt
+RUN pip install -r ./backend/requirements.txt
 
-CMD ["python", "backend/main.py"]
+CMD sh -c "[ -f ./backend/cert.pem ] && [ -f ./backend/key.pem ] || python ./backend/generate_certs.py; python ./backend/main.py"

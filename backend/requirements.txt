@@ -11,6 +11,7 @@ psycopg2-binary>=2.9.0   # PostgreSQL driver
 # Password management & security
 passlib>=1.7.4
 itsdangerous>=2.1.2
+cryptography>=42.0.0
 
 # Optional: environment variables
 python-dotenv>=1.0.0
