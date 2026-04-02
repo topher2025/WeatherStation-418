@@ -1,8 +1,16 @@
+import json
 import os
 import uuid
+from pathlib import Path
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import database as db
+
+try:
+    from dotenv import load_dotenv as _load_dotenv
+except ImportError:
+    def _load_dotenv() -> None:
+        return None
 
 app = Flask(
     __name__,
@@ -10,6 +18,39 @@ app = Flask(
     static_folder="../frontend/static",
     static_url_path="/static",
 )
+
+def _load_local_env() -> None:
+    _load_dotenv()
+
+    env_path = Path(__file__).resolve().parents[1] / ".env"
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text(encoding="utf-8-sig").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("export "):
+            stripped = stripped[len("export ") :].lstrip()
+        if "=" not in stripped:
+            continue
+
+        key, value = stripped.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+
+        if (
+            len(value) >= 2
+            and ((value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")))
+        ):
+            value = value[1:-1]
+
+        os.environ.setdefault(key, value)
+
+
+_load_local_env()
 
 app.config["SECRET_KEY"] = os.getenv(
     "WEATHER_SECRET_KEY", "weather-station-dev-secret-change-me"
@@ -21,14 +62,7 @@ SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(
     os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15")
 )
 
-# Five hardcoded users (passwords must be changed in database only)
-HARDCODED_ACCOUNTS = {
-    "ops1": "RainOps!418",
-    "ops2": "SkyWatch!729",
-    "ops3": "Barometer#552",
-    "ops4": "Nimbus$840",
-    "ops5": "TempFlux%991",
-}
+AUTH_ACCOUNTS_ENV_VAR = "WEATHER_AUTH_ACCOUNTS"
 
 _AUTH_BOOTSTRAPPED = False
 
@@ -47,6 +81,45 @@ def _verify_credentials(username: str, password: str) -> bool:
     return check_password_hash(user["password_hash"], password)
 
 
+def _load_auth_accounts() -> dict[str, str]:
+    raw_accounts = os.getenv(AUTH_ACCOUNTS_ENV_VAR)
+    if not raw_accounts:
+        raise RuntimeError(
+            f"{AUTH_ACCOUNTS_ENV_VAR} must be set as an environment variable containing a JSON object mapping usernames to passwords (for local development, you can set this in a .env file)."
+        )
+
+    try:
+        accounts = json.loads(raw_accounts)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"{AUTH_ACCOUNTS_ENV_VAR} must contain valid JSON."
+        ) from exc
+
+    if not isinstance(accounts, dict):
+        raise RuntimeError(
+            f"{AUTH_ACCOUNTS_ENV_VAR} must be a JSON object mapping usernames to passwords."
+        )
+
+    normalized_accounts: dict[str, str] = {}
+    for username, password in accounts.items():
+        if not isinstance(username, str) or not username.strip():
+            raise RuntimeError(
+                f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid username."
+            )
+        if not isinstance(password, str) or not password:
+            raise RuntimeError(
+                f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid password for '{username}'."
+            )
+        normalized_accounts[username.strip()] = password
+
+    if not normalized_accounts:
+        raise RuntimeError(
+            f"{AUTH_ACCOUNTS_ENV_VAR} must define at least one account."
+        )
+
+    return normalized_accounts
+
+
 def _bootstrap_auth_accounts(force_update=False):
     global _AUTH_BOOTSTRAPPED
     if _AUTH_BOOTSTRAPPED and not force_update:
@@ -54,18 +127,9 @@ def _bootstrap_auth_accounts(force_update=False):
 
     db.init_db()
 
-    for username, plain_password in HARDCODED_ACCOUNTS.items():
-        if force_update:
-            password_hash = generate_password_hash(plain_password)
-            db.upsert_user_password(username, password_hash, is_active=1)
-            continue
-
-        # Only hash when account is first created; avoids expensive startup work
-        # and preserves password changes that were made directly in the database.
-        existing_user = db.get_user_auth(username)
-        if existing_user is None:
-            password_hash = generate_password_hash(plain_password)
-            db.create_user_if_missing(username, password_hash, is_active=1)
+    for username, plain_password in _load_auth_accounts().items():
+        password_hash = generate_password_hash(plain_password)
+        db.upsert_user_password(username, password_hash, is_active=1)
 
     _AUTH_BOOTSTRAPPED = True
 
@@ -193,9 +257,17 @@ def login():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
+    print("\n=== LOGOUT ROUTE CALLED ===")
+    print(f"Request method: {request.method}")
+    print(f"Request path: {request.path}")
+
     username = session.get("username")
+    session_id = session.get("session_id")
+    print(f"Current session username: {username}")
+    print(f"Current session_id: {session_id}")
 
     if username:
+        print(f"Clearing session for user: {username}")
         try:
             db.logout_session(username)
         except Exception:
@@ -206,6 +278,8 @@ def logout():
         return "", 200
     return redirect(url_for("login"))
 
+    print("Redirecting to login page")
+    return redirect(url_for("login_page"))
 
 
 @app.get("/history")
