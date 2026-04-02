@@ -85,7 +85,8 @@ def _load_auth_accounts() -> dict[str, str]:
     raw_accounts = os.getenv(AUTH_ACCOUNTS_ENV_VAR)
     if not raw_accounts:
         raise RuntimeError(
-            f"{AUTH_ACCOUNTS_ENV_VAR} must be set as an environment variable containing a JSON object mapping usernames to passwords (for local development, you can set this in a .env file)."
+            f"{AUTH_ACCOUNTS_ENV_VAR} must be set as an environment variable containing a JSON object mapping"
+            f" usernames to passwords (for local development, you can set this in a .env file)."
         )
 
     try:
