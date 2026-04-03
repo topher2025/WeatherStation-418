@@ -27,7 +27,8 @@ def init_db():
     with connect_db() as conn:
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS weather_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -36,9 +37,11 @@ def init_db():
                 pressure REAL,
                 gas_resistance REAL
             )
-            """)
+            """
+        )
 
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
@@ -48,7 +51,8 @@ def init_db():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-            """)
+            """
+        )
 
     _ensure_user_columns()
 
@@ -67,7 +71,6 @@ def _ensure_user_columns():
             cur.execute("ALTER TABLE users ADD COLUMN last_heartbeat_at DATETIME")
 
     _USER_COLUMNS_READY = True
-
 
 
 # Insert weather data
@@ -89,11 +92,13 @@ def get_latest_weather():
     with connect_db() as conn:
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT * FROM weather_data
             ORDER BY id DESC
             LIMIT 1
-            """)
+            """
+        )
 
         row = cur.fetchone()
 
@@ -168,10 +173,12 @@ def get_all_weather():
     with connect_db() as conn:
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT * FROM weather_data
             ORDER BY timestamp ASC
-            """)
+            """
+        )
 
         rows = cur.fetchall()
 
@@ -183,9 +190,11 @@ def get_data_point_count():
     with connect_db() as conn:
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT COUNT(*) as count FROM weather_data
-            """)
+            """
+        )
 
         row = cur.fetchone()
 
@@ -368,7 +377,6 @@ def is_session_active(username, session_id):
 
     stored_session_id = get_user_session_id(username)
     return stored_session_id is not None and stored_session_id == session_id
-
 
 
 def utc_to_local(utc_dt):
