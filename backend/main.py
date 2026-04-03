@@ -9,8 +9,10 @@ import database as db
 try:
     from dotenv import load_dotenv as _load_dotenv
 except ImportError:
+
     def _load_dotenv() -> None:
         return None
+
 
 app = Flask(
     __name__,
@@ -18,6 +20,7 @@ app = Flask(
     static_folder="../frontend/static",
     static_url_path="/static",
 )
+
 
 def _load_local_env() -> None:
     _load_dotenv()
@@ -41,9 +44,8 @@ def _load_local_env() -> None:
         if not key:
             continue
 
-        if (
-            len(value) >= 2
-            and ((value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")))
+        if len(value) >= 2 and (
+            (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'"))
         ):
             value = value[1:-1]
 
@@ -52,15 +54,11 @@ def _load_local_env() -> None:
 
 _load_local_env()
 
-app.config["SECRET_KEY"] = os.getenv(
-    "WEATHER_SECRET_KEY", "weather-station-dev-secret-change-me"
-)
+app.config["SECRET_KEY"] = os.getenv("WEATHER_SECRET_KEY", "weather-station-dev-secret-change-me")
 
 HOST = os.getenv("WEATHER_API_HOST", "0.0.0.0")
 PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
-SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(
-    os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15")
-)
+SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15"))
 
 AUTH_ACCOUNTS_ENV_VAR = "WEATHER_AUTH_ACCOUNTS"
 
@@ -92,31 +90,21 @@ def _load_auth_accounts() -> dict[str, str]:
     try:
         accounts = json.loads(raw_accounts)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(
-            f"{AUTH_ACCOUNTS_ENV_VAR} must contain valid JSON."
-        ) from exc
+        raise RuntimeError(f"{AUTH_ACCOUNTS_ENV_VAR} must contain valid JSON.") from exc
 
     if not isinstance(accounts, dict):
-        raise RuntimeError(
-            f"{AUTH_ACCOUNTS_ENV_VAR} must be a JSON object mapping usernames to passwords."
-        )
+        raise RuntimeError(f"{AUTH_ACCOUNTS_ENV_VAR} must be a JSON object mapping usernames to passwords.")
 
     normalized_accounts: dict[str, str] = {}
     for username, password in accounts.items():
         if not isinstance(username, str) or not username.strip():
-            raise RuntimeError(
-                f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid username."
-            )
+            raise RuntimeError(f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid username.")
         if not isinstance(password, str) or not password:
-            raise RuntimeError(
-                f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid password for '{username}'."
-            )
+            raise RuntimeError(f"{AUTH_ACCOUNTS_ENV_VAR} contains an invalid password for '{username}'.")
         normalized_accounts[username.strip()] = password
 
     if not normalized_accounts:
-        raise RuntimeError(
-            f"{AUTH_ACCOUNTS_ENV_VAR} must define at least one account."
-        )
+        raise RuntimeError(f"{AUTH_ACCOUNTS_ENV_VAR} must define at least one account.")
 
     return normalized_accounts
 
@@ -199,9 +187,7 @@ def validate_payload(payload: dict):
 
 
 def log_data(data: dict):
-    db.insert_weather(
-        data["temperature_C"], data["humidity"], data["pressure"], data["gas"]
-    )
+    db.insert_weather(data["temperature_C"], data["humidity"], data["pressure"], data["gas"])
 
 
 @app.get("/")
@@ -231,7 +217,7 @@ def login():
                 render_template(
                     "login.html",
                     error="This account is already logged in on another device."
-                          " Please log out from the other session first.",
+                    " Please log out from the other session first.",
                     next_target=next_target,
                 ),
                 409,
@@ -249,9 +235,7 @@ def login():
     if not _is_safe_next(next_target):
         next_target = "/"
     return (
-        render_template(
-            "login.html", error="Invalid username or password.", next_target=next_target
-        ),
+        render_template("login.html", error="Invalid username or password.", next_target=next_target),
         401,
     )
 
@@ -362,18 +346,11 @@ def user():
         session.clear()
         return jsonify(error="Session expired."), 401
 
-
     return "", 204
-
-
-
 
 
 if __name__ == "__main__":
     _bootstrap_auth_accounts()
     cert_path = os.path.join(os.path.dirname(__file__), "cert.pem")
     key_path = os.path.join(os.path.dirname(__file__), "key.pem")
-    app.run(host=HOST,
-            port=PORT,
-            ssl_context=(cert_path, key_path),
-            threaded=True)
+    app.run(host=HOST, port=PORT, ssl_context=(cert_path, key_path), threaded=True)

@@ -1,10 +1,10 @@
 from machine import Pin, I2C
+import network
 from time import sleep
 from bme680 import BME680_I2C
 import json
 import socket
 import ujson
-import ssl
 
 # Load json files
 with open("pins.json") as f:
@@ -14,6 +14,28 @@ with open("host.json") as f:
 
 i2c = I2C(id=1, scl=Pin(pins["scl"]), sda=Pin(pins["sda"]), freq=100000)
 bme = BME680_I2C(i2c=i2c)
+
+
+def connect_wifi():
+    ssid = "Eng402"
+    password = "IheartCyber"
+
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+
+    if not wlan.isconnected():
+        print("Connecting to WiFi...")
+        wlan.connect(ssid, password)
+
+        timeout = 10
+        while not wlan.isconnected() and timeout > 0:
+            sleep(1)
+            timeout -= 1
+
+    if wlan.isconnected():
+        print("Connected to WiFi:", wlan.ifconfig())
+    else:
+        print("Failed to connect to WiFi")
 
 
 def read_sensor():
@@ -47,15 +69,6 @@ def main():
         sleep(5)
 
 
-def _wrap_socket_with_ssl(sock):
-    """Wrap socket with SSL/TLS for MicroPython"""
-    try:
-        return ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
-    except TypeError:
-        # Some MicroPython versions don't accept cert_reqs as keyword
-        return ssl.wrap_socket(sock)
-
-
 def send_json(data, retries=3):
     payload = ujson.dumps(data)
     s = None
@@ -75,10 +88,6 @@ def send_json(data, retries=3):
             addr = socket.getaddrinfo(host["ip"], host["port"])[0][-1]
             s = socket.socket()
             s.settimeout(5)
-
-            # Wrap socket with SSL/TLS
-            s = _wrap_socket_with_ssl(s)
-
             s.connect(addr)
             s.sendall(request.encode())
 
@@ -111,4 +120,5 @@ def send_json(data, retries=3):
 
 
 if __name__ == "__main__":
+    connect_wifi()
     main()
