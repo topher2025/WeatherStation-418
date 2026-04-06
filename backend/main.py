@@ -20,6 +20,11 @@ app = Flask(
     static_folder="../frontend/static",
     static_url_path="/static",
 )
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,   # only if using HTTPS
+    SESSION_COOKIE_SAMESITE="Lax"
+)
 
 
 def _load_local_env() -> None:
