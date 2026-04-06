@@ -33,6 +33,44 @@ body {
     flex-direction: column;
 }
 
+body.light-theme {
+    --primary-color: #e2e8f0;
+    --secondary-color: #0284c7;
+    --accent-color: #e11d48;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --bg-color: #f8fafc;
+    --bg-secondary: #eef2ff;
+    --text-color: #0f172a;
+    --text-secondary: #334155;
+    --card-bg: #ffffff;
+    --border-color: #cbd5e1;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+body.light-theme .navbar,
+body.light-theme .footer {
+    background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+}
+
+body.light-theme .navbar-brand h1 {
+    color: #0f172a;
+}
+
+body.light-theme .card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.9) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.55);
+}
+
+body.light-theme .weather-item,
+body.light-theme .trend-item,
+body.light-theme .settings-info-item,
+body.light-theme .history-container,
+body.light-theme .settings-input {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(148, 163, 184, 0.55);
+}
+
 /* ========== Navbar ========== */
 .navbar {
     background: linear-gradient(90deg, #0f172a 0%, #1a1f3a 50%, #0f172a 100%);

@@ -28,7 +28,8 @@ function scheduleLogout() {
     }
 
     timeoutObj = setTimeout(function () {
-        localStorage.clear();
+        // Keep UI preferences (theme/unit/refresh) while ending auth session.
+        localStorage.removeItem('username');
         window.location = '/logout';
     }, IDLE_TIMEOUT_MS);
 }
