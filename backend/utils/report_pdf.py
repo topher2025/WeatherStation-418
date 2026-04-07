@@ -75,10 +75,14 @@ def build_weather_pdf(formatted_rows, range_label):
         f"Range: {summary.get('start_local', 'N/A')} to {summary.get('end_local', 'N/A')}",
         f"Readings: {summary.get('count', 0)}",
         "",
-        f"Temperature (C): avg {summary['temperature']['avg']:.2f} | min {summary['temperature']['min']:.2f} | max {summary['temperature']['max']:.2f}",
-        f"Humidity (%): avg {summary['humidity']['avg']:.2f} | min {summary['humidity']['min']:.2f} | max {summary['humidity']['max']:.2f}",
-        f"Pressure (hPa): avg {summary['pressure']['avg']:.2f} | min {summary['pressure']['min']:.2f} | max {summary['pressure']['max']:.2f}",
-        f"Gas Resistance (Ohms): avg {summary['gas_resistance']['avg']:.2f} | min {summary['gas_resistance']['min']:.2f} | max {summary['gas_resistance']['max']:.2f}",
+        f"Temperature (C): avg {summary['temperature']['avg']:.2f} | min {summary['temperature']['min']:.2f} |"
+            f" max {summary['temperature']['max']:.2f}",
+        f"Humidity (%): avg {summary['humidity']['avg']:.2f} | min {summary['humidity']['min']:.2f} |"
+            f" max {summary['humidity']['max']:.2f}",
+        f"Pressure (hPa): avg {summary['pressure']['avg']:.2f} | min {summary['pressure']['min']:.2f} |"
+            f" max {summary['pressure']['max']:.2f}",
+        f"Gas Resistance (Ohms): avg {summary['gas_resistance']['avg']:.2f} |"
+            f" min {summary['gas_resistance']['min']:.2f} | max {summary['gas_resistance']['max']:.2f}",
         "",
         "Data columns: local timestamp, temperature, humidity, pressure, gas resistance",
     ]
@@ -105,7 +109,8 @@ def build_weather_pdf(formatted_rows, range_label):
     table_header = "Timestamp Local     | Temp C | Hum % | Press hPa | Gas Ohms"
     table_separator = "-" * len(table_header)
     table_rows = [
-        f"{row['timestamp_local']:<19} | {row['temperature']:>6.2f} | {row['humidity']:>5.1f} | {row['pressure']:>9.1f} | {row['gas_resistance']:>8.0f}"
+        (f"{row['timestamp_local']:<19} | {row['temperature']:>6.2f} | {row['humidity']:>5.1f} |"
+            f" {row['pressure']:>9.1f} | {row['gas_resistance']:>8.0f}")
         for row in table_rows
     ]
 
@@ -208,7 +213,8 @@ def _build_chart_page_stream(page):
         "0.85 0.85 0.90 rg",
         _pdf_text_line(page_title, left_margin, height - 20, font_size=13),
         _pdf_text_line(
-            f"Readings: {summary.get('count', len(rows))}    Range: {summary.get('start_local', 'N/A')} to {summary.get('end_local', 'N/A')}",
+            f"Readings: {summary.get('count', len(rows))}    Range: {summary.get('start_local', 'N/A')} to"
+                f" {summary.get('end_local', 'N/A')}",
             left_margin,
             height - 36,
             font_size=8,
@@ -230,7 +236,8 @@ def _build_chart_page_stream(page):
         page_lines.extend(
             [
                 f"0.15 0.17 0.23 rg {left_margin:.2f} {panel_bottom:.2f} {panel_width:.2f} {panel_height:.2f} re f",
-                f"0.30 0.37 0.48 RG 0.8 w {left_margin:.2f} {panel_bottom:.2f} {panel_width:.2f} {panel_height:.2f} re S",
+                f"0.30 0.37 0.48 RG 0.8 w {left_margin:.2f} {panel_bottom:.2f} "
+                    f"{panel_width:.2f} {panel_height:.2f} re S",
                 # Light text for chart title
                 "0.85 0.85 0.90 rg",
                 _pdf_text_line(chart["title"], left_margin + 10, panel_top - 16, font_size=11),
@@ -239,7 +246,8 @@ def _build_chart_page_stream(page):
                 _pdf_text_line(f"Max: {max_value:.2f}", left_margin + 10, panel_bottom + 8, font_size=7),
                 _pdf_text_line(f"Min: {min_value:.2f}", plot_right - 70, panel_bottom + 8, font_size=7),
                 f"0.30 0.37 0.48 RG 0.5 w {plot_left:.2f} {plot_bottom:.2f} m {plot_right:.2f} {plot_bottom:.2f} l S",
-                f"0.30 0.37 0.48 RG 0.5 w {plot_left:.2f} {plot_bottom:.2f} m {plot_left:.2f} {plot_bottom + plot_height:.2f} l S",
+                f"0.30 0.37 0.48 RG 0.5 w {plot_left:.2f} {plot_bottom:.2f} m {plot_left:.2f} "
+                    f"{plot_bottom + plot_height:.2f} l S",
             ]
         )
 
@@ -258,7 +266,8 @@ def _build_chart_page_stream(page):
             page_lines.append("Q")
 
             for x, y in points:
-                page_lines.append(f"{color_r:.3f} {color_g:.3f} {color_b:.3f} rg {x - 1.4:.2f} {y - 1.4:.2f} 2.8 2.8 re f")
+                page_lines.append(f"{color_r:.3f} {color_g:.3f} {color_b:.3f} rg {x - 1.4:.2f} "
+                                    f"{y - 1.4:.2f} 2.8 2.8 re f")
 
     page_lines.append("Q")
     return "\n".join(page_lines).encode("latin-1", errors="ignore")
