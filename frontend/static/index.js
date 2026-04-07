@@ -7,11 +7,18 @@ const CONFIG = {
     chartUpdateInterval: 5000, // Update trends every 5 seconds
 };
 
+const DEFAULT_SETTINGS = {
+    theme: 'dark',
+    tempUnit: 'celsius',
+    refreshInterval: 5,
+};
+
 // State
 let currentWeatherData = null;
 let historicalData = null;
 let autoUpdateInterval = null;
 let chartUpdateInterval = null;
+let settings = { ...DEFAULT_SETTINGS };
 
 // ========== Initialization ==========
 document.addEventListener('DOMContentLoaded', function () {
@@ -20,14 +27,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function initializeDashboard() {
     console.log('Initializing Weather Dashboard...');
+
+    settings = loadSettings();
+    applyTheme(settings.theme);
     
     // Fetch initial data
     fetchCurrentWeather();
     fetchHistoricalData();
     
     // Set up auto-refresh
-    autoUpdateInterval = setInterval(fetchCurrentWeather, CONFIG.updateInterval);
-    chartUpdateInterval = setInterval(fetchHistoricalData, CONFIG.chartUpdateInterval);
+    configureAutoRefresh(settings.refreshInterval);
     
     // Update last updated timestamp
     updateLastUpdatedTime();
@@ -36,6 +45,113 @@ function initializeDashboard() {
     // Ensure stats card is initialized
     console.log('Dashboard initialization complete');
 }
+
+function loadSettings() {
+    const storedTheme = localStorage.getItem('theme') || DEFAULT_SETTINGS.theme;
+    const storedTempUnit = localStorage.getItem('tempUnit') || DEFAULT_SETTINGS.tempUnit;
+    const storedRefreshSeconds = Number(localStorage.getItem('refreshInterval'));
+
+    return {
+        theme: ['dark', 'light', 'auto'].includes(storedTheme) ? storedTheme : DEFAULT_SETTINGS.theme,
+        tempUnit: ['celsius', 'fahrenheit', 'both'].includes(storedTempUnit)
+            ? storedTempUnit
+            : DEFAULT_SETTINGS.tempUnit,
+        refreshInterval: Number.isFinite(storedRefreshSeconds)
+            ? Math.min(Math.max(storedRefreshSeconds, 1), 60)
+            : DEFAULT_SETTINGS.refreshInterval,
+    };
+}
+
+function applyTheme(theme) {
+    if (!document.body) {
+        return;
+    }
+
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        return;
+    }
+
+    if (theme === 'auto') {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        document.body.classList.toggle('light-theme', prefersLight);
+        return;
+    }
+
+    document.body.classList.remove('light-theme');
+}
+
+function configureAutoRefresh(refreshSeconds) {
+    const refreshMs = refreshSeconds * 1000;
+
+    if (autoUpdateInterval) {
+        clearInterval(autoUpdateInterval);
+    }
+    if (chartUpdateInterval) {
+        clearInterval(chartUpdateInterval);
+    }
+
+    autoUpdateInterval = setInterval(fetchCurrentWeather, refreshMs);
+    chartUpdateInterval = setInterval(fetchHistoricalData, refreshMs);
+}
+
+function cToF(value) {
+    return (value * 9) / 5 + 32;
+}
+
+function formatTempParts(celsiusValue) {
+    if (settings.tempUnit === 'fahrenheit') {
+        return {
+            value: cToF(celsiusValue).toFixed(1),
+            unit: 'F',
+        };
+    }
+
+    if (settings.tempUnit === 'both') {
+        return {
+            value: `${celsiusValue.toFixed(1)} / ${cToF(celsiusValue).toFixed(1)}`,
+            unit: 'C/F',
+        };
+    }
+
+    return {
+        value: celsiusValue.toFixed(1),
+        unit: 'C',
+    };
+}
+
+function formatTempLabel(celsiusValue) {
+    const parts = formatTempParts(celsiusValue);
+    return `${parts.value}${String.fromCharCode(176)}${parts.unit}`;
+}
+
+window.addEventListener('storage', function (event) {
+    if (!['theme', 'tempUnit', 'refreshInterval'].includes(event.key)) {
+        return;
+    }
+
+    settings = loadSettings();
+    applyTheme(settings.theme);
+    configureAutoRefresh(settings.refreshInterval);
+    if (currentWeatherData) {
+        updateCurrentWeatherDisplay(currentWeatherData);
+    }
+    if (historicalData) {
+        updateHistoricalDisplay(historicalData);
+    }
+});
+
+window.addEventListener('settings-updated', function (event) {
+    settings = event.detail || loadSettings();
+    applyTheme(settings.theme);
+    configureAutoRefresh(settings.refreshInterval);
+    if (currentWeatherData) {
+        updateCurrentWeatherDisplay(currentWeatherData);
+    }
+    if (historicalData) {
+        updateHistoricalDisplay(historicalData);
+    }
+});
 
 // ========== Data Fetching ==========
 async function fetchCurrentWeather() {
@@ -151,9 +267,11 @@ function updateCurrentWeatherDisplay(data) {
     const gasElement = document.getElementById('current-gas');
     
     if (tempElement) {
+        const temperature = Number(data.temperature || 0);
+        const tempDisplay = formatTempParts(temperature);
         tempElement.innerHTML = `
-            <div class="weather-value">${(data.temperature || 0).toFixed(1)}</div>
-            <div class="weather-unit">°C</div>
+            <div class="weather-value">${tempDisplay.value}</div>
+            <div class="weather-unit">${String.fromCharCode(176)}${tempDisplay.unit}</div>
         `;
     }
     
@@ -206,10 +324,10 @@ function updateHistoricalDisplay(data) {
             tempTrendElement.innerHTML = `
                 <div class="trend-bar">
                     <div class="trend-bar-fill" style="width: ${((data.tempAvg - data.tempLow) / tempRange) * 100}%">
-                        ${data.tempAvg.toFixed(1)}°C
+                        ${formatTempLabel(data.tempAvg)}
                     </div>
                 </div>
-                <small>Min: ${data.tempLow.toFixed(1)}°C | Max: ${data.tempHigh.toFixed(1)}°C</small>
+                <small>Min: ${formatTempLabel(data.tempLow)} | Max: ${formatTempLabel(data.tempHigh)}</small>
             `;
         }
     }
@@ -288,7 +406,7 @@ function updateStatsCard(data) {
     if (tempHighElement) {
         try {
             const barWidth = Math.min((data.tempHigh / 50) * 100, 100);
-            const html = `<div class="trend-bar"><div class="trend-bar-fill" style="width: ${barWidth}%">${data.tempHigh.toFixed(1)}°C</div></div>`;
+            const html = `<div class="trend-bar"><div class="trend-bar-fill" style="width: ${barWidth}%">${formatTempLabel(data.tempHigh)}</div></div>`;
             tempHighElement.innerHTML = html;
             console.log('✓ stat-temp-high updated:', html);
             successCount++;
@@ -304,7 +422,7 @@ function updateStatsCard(data) {
     if (tempLowElement) {
         try {
             const barWidth = Math.min((data.tempLow / 50) * 100, 100);
-            const html = `<div class="trend-bar"><div class="trend-bar-fill" style="width: ${barWidth}%; background: linear-gradient(90deg, #3498db, #2980b9);">${data.tempLow.toFixed(1)}°C</div></div>`;
+            const html = `<div class="trend-bar"><div class="trend-bar-fill" style="width: ${barWidth}%; background: linear-gradient(90deg, #3498db, #2980b9);">${formatTempLabel(data.tempLow)}</div></div>`;
             tempLowElement.innerHTML = html;
             console.log('✓ stat-temp-low updated:', html);
             successCount++;
