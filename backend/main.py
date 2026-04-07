@@ -1,10 +1,13 @@
+import csv
 import json
 import os
 import uuid
+from io import BytesIO, StringIO
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template, redirect, session, url_for
+from flask import Flask, jsonify, request, render_template, redirect, session, url_for, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 import database as db
+from utils.report_pdf import build_weather_pdf
 
 try:
     from dotenv import load_dotenv as _load_dotenv
@@ -61,6 +64,7 @@ PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
 SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15"))
 
 AUTH_ACCOUNTS_ENV_VAR = "WEATHER_AUTH_ACCOUNTS"
+MAX_REPORT_HOURS = 168
 
 _AUTH_BOOTSTRAPPED = False
 
@@ -125,6 +129,88 @@ def _bootstrap_auth_accounts(force_update=False):
 
 def _expire_stale_user_sessions():
     db.expire_stale_sessions(SESSION_HEARTBEAT_TIMEOUT_SECONDS)
+
+
+def _sanitize_report_hours(value, default=24):
+    try:
+        hours = abs(int(value))
+    except (TypeError, ValueError):
+        hours = default
+
+    return max(1, min(hours, MAX_REPORT_HOURS))
+
+
+def _parse_report_range(raw_value, default_hours=24):
+    token = str(raw_value or default_hours).strip().lower()
+    if token in {"all", "all-time", "all_time"}:
+        return "all", None
+    return "hours", _sanitize_report_hours(token, default_hours)
+
+
+def _report_range_label(range_kind, hours):
+    if range_kind == "all":
+        return "All time"
+    return f"Last {hours} hours"
+
+
+def _get_report_rows(range_kind, hours):
+    if range_kind == "all":
+        return db.get_all_weather()
+    return db.get_hourly_weather(hours)
+
+
+def _get_report_rows_for_pdf(range_kind, hours):
+    """Get hourly-averaged data for PDF reports (keeps website data unchanged)"""
+    if range_kind == "all":
+        return db.get_all_hourly_average_weather()
+    return db.get_hourly_average_weather(hours)
+
+
+def _format_report_rows(rows):
+    formatted_rows = []
+    for row in rows:
+        local_timestamp = db.utc_to_local(row["timestamp"])
+        formatted_rows.append(
+            {
+                "timestamp_utc": row["timestamp"],
+                "timestamp_local": local_timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                "temperature": float(row["temperature"]),
+                "humidity": float(row["humidity"]),
+                "pressure": float(row["pressure"]),
+                "gas_resistance": float(row["gas_resistance"]),
+            }
+        )
+    return formatted_rows
+
+
+def _build_report_filename(range_kind, hours, extension):
+    from datetime import datetime as _datetime
+
+    generated_at = _datetime.now().strftime("%Y%m%d-%H%M%S")
+    if range_kind == "all":
+        return f"weather-report-all-time-{generated_at}.{extension}"
+    return f"weather-report-{_sanitize_report_hours(hours)}h-{generated_at}.{extension}"
+
+
+def _build_weather_csv(rows):
+    formatted_rows = _format_report_rows(rows)
+    output = StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=[
+            "timestamp_local",
+            "timestamp_utc",
+            "temperature",
+            "humidity",
+            "pressure",
+            "gas_resistance",
+        ],
+    )
+    writer.writeheader()
+    writer.writerows(formatted_rows)
+    output.seek(0)
+    return output.getvalue().encode("utf-8")
+
 
 
 @app.before_request
@@ -195,6 +281,13 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/data")
+def data_page():
+    range_kind, hours = _parse_report_range(request.args.get("hours", "24"), default_hours=24)
+    default_range = "all" if range_kind == "all" else str(hours)
+    return render_template("data.html", default_range=default_range)
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -242,17 +335,9 @@ def login():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    print("\n=== LOGOUT ROUTE CALLED ===")
-    print(f"Request method: {request.method}")
-    print(f"Request path: {request.path}")
-
     username = session.get("username")
-    session_id = session.get("session_id")
-    print(f"Current session username: {username}")
-    print(f"Current session_id: {session_id}")
 
     if username:
-        print(f"Clearing session for user: {username}")
         try:
             db.logout_session(username)
         except Exception:
@@ -263,9 +348,6 @@ def logout():
         return "", 200
     return redirect(url_for("login"))
 
-    print("Redirecting to login page")
-    return redirect(url_for("login_page"))
-
 
 @app.get("/history")
 def history_page():
@@ -275,6 +357,39 @@ def history_page():
 @app.get("/settings")
 def settings_page():
     return render_template("settings.html")
+
+
+@app.get("/api/b2f/report.csv")
+def download_weather_report_csv():
+    range_kind, hours = _parse_report_range(request.args.get("hours", "24"), default_hours=24)
+    rows = _get_report_rows(range_kind, hours)
+    if not rows:
+        return jsonify(error="No historical data available."), 404
+
+    csv_buffer = BytesIO(_build_weather_csv(rows))
+    return send_file(
+        csv_buffer,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=_build_report_filename(range_kind, hours, "csv"),
+    )
+
+
+@app.get("/api/b2f/report.pdf")
+def download_weather_report_pdf():
+    range_kind, hours = _parse_report_range(request.args.get("hours", "24"), default_hours=24)
+    rows = _get_report_rows_for_pdf(range_kind, hours)
+    if not rows:
+        return jsonify(error="No historical data available."), 404
+
+    formatted_rows = _format_report_rows(rows)
+    pdf_buffer = build_weather_pdf(formatted_rows, _report_range_label(range_kind, hours))
+    return send_file(
+        pdf_buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=_build_report_filename(range_kind, hours, "pdf"),
+    )
 
 
 @app.post("/api/s2b/update")
@@ -305,8 +420,8 @@ def get_latest_readings():
 
 @app.get("/api/b2f/hourly")
 def get_hourly_readings():
-    hours = request.args.get("hours", default=12, type=int)
-    hourly_data = db.get_hourly_weather(hours)
+    range_kind, hours = _parse_report_range(request.args.get("hours", "12"), default_hours=12)
+    hourly_data = _get_report_rows(range_kind, hours)
     if not hourly_data:
         return jsonify(error="No historical data available."), 404
     return jsonify(hourly_data)

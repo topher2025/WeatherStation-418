@@ -185,6 +185,62 @@ def get_all_weather():
     return [dict(row) for row in rows]
 
 
+def get_hourly_average_weather(hours=12):
+    try:
+        hours = abs(int(hours))
+    except (TypeError, ValueError):
+        hours = 12
+
+    if hours < 1:
+        hours = 1
+
+    interval = f"-{hours} hours"
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT
+                strftime('%Y-%m-%d %H:00:00', timestamp) AS timestamp,
+                AVG(temperature) AS temperature,
+                AVG(humidity) AS humidity,
+                AVG(pressure) AS pressure,
+                AVG(gas_resistance) AS gas_resistance
+            FROM weather_data
+            WHERE timestamp >= datetime('now', ?)
+            GROUP BY strftime('%Y-%m-%d %H:00:00', timestamp)
+            ORDER BY timestamp ASC
+            """,
+            (interval,),
+        )
+
+        rows = cur.fetchall()
+
+    return [dict(row) for row in rows]
+
+
+def get_all_hourly_average_weather():
+    with connect_db() as conn:
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT
+                strftime('%Y-%m-%d %H:00:00', timestamp) AS timestamp,
+                AVG(temperature) AS temperature,
+                AVG(humidity) AS humidity,
+                AVG(pressure) AS pressure,
+                AVG(gas_resistance) AS gas_resistance
+            FROM weather_data
+            GROUP BY strftime('%Y-%m-%d %H:00:00', timestamp)
+            ORDER BY timestamp ASC
+            """)
+
+        rows = cur.fetchall()
+
+    return [dict(row) for row in rows]
+
+
 def get_data_point_count():
     """Get the total count of data points in the database"""
     with connect_db() as conn:
