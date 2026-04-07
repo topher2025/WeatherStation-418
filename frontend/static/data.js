@@ -3,15 +3,26 @@ const CONFIG = {
     apiBaseUrl: '/api',
 };
 
+const DEFAULT_SETTINGS = {
+    theme: 'dark',
+    tempUnit: 'celsius',
+    refreshInterval: 5,
+};
+
 const MAX_CHART_POINTS = 1200;
 
 const chartInstances = {};
+let settings = { ...DEFAULT_SETTINGS };
+let reportRefreshInterval = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     initializeDataPage();
 });
 
 function initializeDataPage() {
+    settings = loadSettings();
+    applyTheme(settings.theme);
+
     const hoursSelect = document.getElementById('report-hours');
     const refreshBtn = document.getElementById('refresh-report-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
@@ -35,9 +46,72 @@ function initializeDataPage() {
         downloadPdfBtn.addEventListener('click', () => downloadReport('pdf'));
     }
 
+    configureAutoRefresh(settings.refreshInterval);
+
+    window.addEventListener('storage', function (event) {
+        if (!['theme', 'tempUnit', 'refreshInterval'].includes(event.key)) {
+            return;
+        }
+
+        settings = loadSettings();
+        applyTheme(settings.theme);
+        configureAutoRefresh(settings.refreshInterval);
+        loadReportData(getSelectedRange());
+    });
+
+    window.addEventListener('settings-updated', function (event) {
+        settings = event.detail || loadSettings();
+        applyTheme(settings.theme);
+        configureAutoRefresh(settings.refreshInterval);
+        loadReportData(getSelectedRange());
+    });
+
     loadReportData(defaultRange);
     updateLastUpdatedTime();
     setInterval(updateLastUpdatedTime, 60000);
+}
+
+function loadSettings() {
+    const storedTheme = localStorage.getItem('theme') || DEFAULT_SETTINGS.theme;
+    const storedTempUnit = localStorage.getItem('tempUnit') || DEFAULT_SETTINGS.tempUnit;
+    const storedRefreshSeconds = Number(localStorage.getItem('refreshInterval'));
+
+    return {
+        theme: ['dark', 'light', 'auto'].includes(storedTheme) ? storedTheme : DEFAULT_SETTINGS.theme,
+        tempUnit: ['celsius', 'fahrenheit', 'both'].includes(storedTempUnit)
+            ? storedTempUnit
+            : DEFAULT_SETTINGS.tempUnit,
+        refreshInterval: Number.isFinite(storedRefreshSeconds)
+            ? Math.min(Math.max(storedRefreshSeconds, 1), 60)
+            : DEFAULT_SETTINGS.refreshInterval,
+    };
+}
+
+function applyTheme(theme) {
+    if (!document.body) {
+        return;
+    }
+
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        return;
+    }
+
+    if (theme === 'auto') {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        document.body.classList.toggle('light-theme', prefersLight);
+        return;
+    }
+
+    document.body.classList.remove('light-theme');
+}
+
+function configureAutoRefresh(refreshSeconds) {
+    if (reportRefreshInterval) {
+        clearInterval(reportRefreshInterval);
+    }
+
+    reportRefreshInterval = setInterval(() => loadReportData(getSelectedRange()), refreshSeconds * 1000);
 }
 
 function getSelectedRange() {
@@ -162,11 +236,7 @@ function renderCharts(data) {
     clearCharts();
 
     const labels = data.map((record) => formatTimestamp(record.timestamp));
-
-    chartInstances.temperature = createLineChart('temperature-chart', labels, data.map((record) => Number(record.temperature)), {
-        label: 'Temperature (°C)',
-        color: '#0ea5e9',
-    });
+    chartInstances.temperature = createTemperatureChart(labels, data);
 
     chartInstances.humidity = createLineChart('humidity-chart', labels, data.map((record) => Number(record.humidity)), {
         label: 'Humidity (%)',
@@ -181,6 +251,111 @@ function renderCharts(data) {
     chartInstances.gas = createLineChart('gas-chart', labels, data.map((record) => Number(record.gas_resistance)), {
         label: 'Gas Resistance (Ω)',
         color: '#f43f5e',
+    });
+}
+
+function cToF(value) {
+    return (value * 9) / 5 + 32;
+}
+
+function createTemperatureChart(labels, data) {
+    const canvas = document.getElementById('temperature-chart');
+    if (!canvas || typeof Chart === 'undefined') {
+        return null;
+    }
+
+    const celsiusValues = data.map((record) => Number(record.temperature));
+    const fahrenheitValues = celsiusValues.map((value) => cToF(value));
+
+    const datasets = settings.tempUnit === 'both'
+        ? [
+            {
+                label: 'Temperature (°C)',
+                data: celsiusValues,
+                borderColor: '#0ea5e9',
+                backgroundColor: '#0ea5e922',
+                fill: true,
+                tension: 0.25,
+                pointRadius: celsiusValues.length > 450 ? 0 : 2,
+                pointHoverRadius: celsiusValues.length > 450 ? 2 : 4,
+                borderWidth: 2,
+            },
+            {
+                label: 'Temperature (°F)',
+                data: fahrenheitValues,
+                borderColor: '#f97316',
+                backgroundColor: '#f9731622',
+                fill: true,
+                tension: 0.25,
+                pointRadius: fahrenheitValues.length > 450 ? 0 : 2,
+                pointHoverRadius: fahrenheitValues.length > 450 ? 2 : 4,
+                borderWidth: 2,
+            },
+        ]
+        : [
+            {
+                label: settings.tempUnit === 'fahrenheit' ? 'Temperature (°F)' : 'Temperature (°C)',
+                data: settings.tempUnit === 'fahrenheit' ? fahrenheitValues : celsiusValues,
+                borderColor: '#0ea5e9',
+                backgroundColor: '#0ea5e922',
+                fill: true,
+                tension: 0.25,
+                pointRadius: celsiusValues.length > 450 ? 0 : 2,
+                pointHoverRadius: celsiusValues.length > 450 ? 2 : 4,
+                borderWidth: 2,
+            },
+        ];
+
+    return new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels,
+            datasets,
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            animation: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0',
+                    },
+                },
+                tooltip: {
+                    callbacks: {
+                        title(context) {
+                            return context[0]?.label || '';
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#cbd5e1',
+                        maxRotation: 45,
+                        minRotation: 45,
+                        maxTicksLimit: 10,
+                    },
+                    grid: {
+                        color: 'rgba(51, 65, 85, 0.35)',
+                    },
+                },
+                y: {
+                    ticks: {
+                        color: '#cbd5e1',
+                    },
+                    grid: {
+                        color: 'rgba(51, 65, 85, 0.35)',
+                    },
+                },
+            },
+        },
     });
 }
 
@@ -365,4 +540,10 @@ function showError(message) {
         errorDiv.remove();
     }, 5000);
 }
+
+window.addEventListener('beforeunload', function () {
+    if (reportRefreshInterval) {
+        clearInterval(reportRefreshInterval);
+    }
+});
 
