@@ -4,7 +4,7 @@ import os
 import uuid
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template, redirect, session, url_for
+from flask import Flask, jsonify, request, render_template, redirect, send_file, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import database as db
 
@@ -411,13 +411,33 @@ def get_logs():
     requested_lines = max(1, min(requested_lines, LOG_VIEW_MAX_LINES))
 
     lines = _tail_log_lines(requested_lines)
+    log_exists = LOG_FILE_PATH.exists()
+    log_size_bytes = LOG_FILE_PATH.stat().st_size if log_exists else 0
     return jsonify(
         {
             "log_file": LOG_FILE_NAME,
+            "log_dir": str(LOG_DIR),
+            "exists": log_exists,
+            "size_bytes": log_size_bytes,
             "line_count": len(lines),
             "max_lines": LOG_VIEW_MAX_LINES,
             "lines": lines,
         }
+    )
+
+
+@app.get("/api/b2f/logs/download")
+def download_logs():
+    if not LOG_FILE_PATH.exists():
+        return jsonify(error="Log file does not exist yet."), 404
+
+    logger.info("Log download requested by user '%s'", session.get("username"))
+    return send_file(
+        LOG_FILE_PATH,
+        mimetype="text/plain",
+        as_attachment=True,
+        download_name=LOG_FILE_NAME,
+        conditional=True,
     )
 
 
