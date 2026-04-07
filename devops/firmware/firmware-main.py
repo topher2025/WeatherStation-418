@@ -41,7 +41,7 @@ def main():
         data = read_sensor()
         send_json(data)
         print(data)
-        sleep(5)
+        sleep(1)
 
 
 def _wrap_socket_with_ssl(sock):

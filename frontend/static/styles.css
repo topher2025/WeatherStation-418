@@ -661,6 +661,86 @@ body {
     background: rgba(14, 165, 233, 0.8);
 }
 
+/* ========== Data Report Page Styles ========== */
+.data-dashboard {
+    gap: 1.75rem;
+}
+
+.report-controls {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    gap: 1.5rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+}
+
+.report-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: flex-end;
+}
+
+.report-summary {
+    margin-top: 1rem;
+}
+
+.report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.summary-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.65) 0%, rgba(30, 41, 59, 0.45) 100%);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+}
+
+.summary-value {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+.chart-card {
+    grid-column: span 1;
+}
+
+.report-chart {
+    position: relative;
+    height: 320px;
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.5) 0%, rgba(30, 41, 59, 0.3) 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(51, 65, 85, 0.35);
+}
+
+.report-chart canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.data-page .error {
+    grid-column: 1 / -1;
+}
+
 /* ========== Auth Page Styles ========== */
 .auth-wrapper {
     min-height: 100vh;
@@ -776,6 +856,22 @@ body {
     .history-table th,
     .history-table td {
         padding: 0.5rem;
+    }
+
+    .report-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .report-actions {
+        justify-content: flex-start;
+    }
+
+    .report-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .report-chart {
+        height: 260px;
     }
 }
 

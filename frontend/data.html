@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Report - Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body data-default-range="{{ default_range }}">
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🌦️ Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="nav-link">Dashboard</a></li>
+                <li><a href="/history" class="nav-link">History</a></li>
+                <li><a href="/data" class="nav-link active">Data</a></li>
+                <li><a href="/settings" class="nav-link">Settings</a></li>
+                <li class="nav-user">Logged in as {{ session.get('username', 'unknown') }}</li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container data-page">
+        <div class="dashboard data-dashboard">
+            <div class="card data-controls-card" style="grid-column: 1 / -1;">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📄</span>
+                    Weather Report
+                </h2>
+
+                <div class="report-controls">
+                    <div class="report-control-group">
+                        <label for="report-hours" class="settings-label">Report Range</label>
+                        <select id="report-hours" class="settings-input">
+                            <option value="12">Last 12 hours</option>
+                            <option value="24">Last 24 hours</option>
+                            <option value="48">Last 48 hours</option>
+                            <option value="72">Last 72 hours</option>
+                            <option value="168">Last 7 days</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+
+                    <div class="report-actions">
+                        <button id="refresh-report-btn" class="btn btn-primary">Refresh Charts</button>
+                        <button id="download-csv-btn" class="btn btn-secondary">Download CSV</button>
+                        <button id="download-pdf-btn" class="btn btn-secondary">Download PDF</button>
+                    </div>
+                </div>
+
+                <div id="report-summary" class="report-summary">
+                    <div class="loading">Loading report data...</div>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🌡️</span>
+                    Temperature
+                </h2>
+                <div class="chart-container report-chart">
+                    <canvas id="temperature-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">💧</span>
+                    Humidity
+                </h2>
+                <div class="chart-container report-chart">
+                    <canvas id="humidity-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🔽</span>
+                    Pressure
+                </h2>
+                <div class="chart-container report-chart">
+                    <canvas id="pressure-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🧪</span>
+                    Gas Resistance
+                </h2>
+                <div class="chart-container report-chart">
+                    <canvas id="gas-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="/static/data.js"></script>
+    <script src="/static/logout.js"></script>
+</body>
+</html>

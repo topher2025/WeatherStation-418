@@ -4,8 +4,10 @@ WORKDIR /app
 
 COPY backend/*.py ./backend/
 COPY backend/requirements.txt ./backend/
+COPY backend/utils/*.py ./backend/utils/
 COPY frontend/*.html ./frontend/
 COPY frontend/static ./frontend/static
+COPY .env ./.env
 
 RUN pip install -r ./backend/requirements.txt
 
