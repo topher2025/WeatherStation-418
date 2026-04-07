@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import uuid
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -70,6 +72,45 @@ LOGIN_ATTEMPT_MAX_LOCKOUT_SECONDS = int(os.getenv("WEATHER_LOGIN_ATTEMPT_MAX_LOC
 
 AUTH_ACCOUNTS_ENV_VAR = "WEATHER_AUTH_ACCOUNTS"
 
+DEFAULT_LOG_DIR = Path(__file__).resolve().parent / "logs"
+LOG_DIR = Path(os.getenv("WEATHER_LOG_DIR", str(DEFAULT_LOG_DIR))).resolve()
+LOG_FILE_NAME = Path(os.getenv("WEATHER_LOG_FILE", "weatherstation.log")).name
+LOG_FILE_PATH = LOG_DIR / LOG_FILE_NAME
+LOG_LEVEL = os.getenv("WEATHER_LOG_LEVEL", "INFO").upper()
+LOG_MAX_BYTES = int(os.getenv("WEATHER_LOG_MAX_BYTES", str(2 * 1024 * 1024)))
+LOG_BACKUP_COUNT = int(os.getenv("WEATHER_LOG_BACKUP_COUNT", "5"))
+LOG_VIEW_DEFAULT_LINES = int(os.getenv("WEATHER_LOG_VIEW_DEFAULT_LINES", "200"))
+LOG_VIEW_MAX_LINES = int(os.getenv("WEATHER_LOG_VIEW_MAX_LINES", "1000"))
+
+
+def _configure_logging() -> logging.Logger:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger("weatherstation")
+    logger.setLevel(getattr(logging, LOG_LEVEL, logging.INFO))
+    logger.handlers.clear()
+
+    formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s")
+
+    file_handler = RotatingFileHandler(
+        LOG_FILE_PATH,
+        maxBytes=max(1, LOG_MAX_BYTES),
+        backupCount=max(1, LOG_BACKUP_COUNT),
+        encoding="utf-8",
+    )
+    file_handler.setFormatter(formatter)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    logger.propagate = False
+    return logger
+
+
+logger = _configure_logging()
+
 _AUTH_BOOTSTRAPPED = False
 
 
@@ -135,6 +176,18 @@ def _bootstrap_auth_accounts(force_update=False):
         db.upsert_user_password(username, password_hash, is_active=1)
 
     _AUTH_BOOTSTRAPPED = True
+    logger.info("Authentication accounts bootstrapped")
+
+
+def _tail_log_lines(line_count: int) -> list[str]:
+    if line_count <= 0:
+        return []
+    if not LOG_FILE_PATH.exists():
+        return []
+
+    with LOG_FILE_PATH.open("r", encoding="utf-8", errors="replace") as log_file:
+        lines = log_file.read().splitlines()
+    return lines[-line_count:]
 
 
 def _expire_stale_user_sessions():
@@ -164,9 +217,11 @@ def enforce_authentication():
             return
 
         # Session is stale or replaced by another login; force re-authentication.
+        logger.info("Session expired for user '%s'", username)
         session.clear()
 
     if request.path.startswith("/api/"):
+        logger.warning("Unauthorized API request to '%s'", request.path)
         return jsonify(error="Authentication required."), 401
 
     next_target = request.full_path if request.query_string else request.path
@@ -229,6 +284,7 @@ def login():
 
     lockout_seconds = db.get_login_lockout_seconds_remaining(username)
     if lockout_seconds > 0:
+        logger.warning("Login blocked by lockout for user '%s'", username)
         wait_display = _format_wait_min_sec(lockout_seconds)
         return (
             render_template(
@@ -246,6 +302,7 @@ def login():
         # Check if user is already logged in elsewhere
         current_session_id = str(uuid.uuid4())
         if db.is_user_logged_in_elsewhere(username, current_session_id):
+            logger.warning("Login blocked for user '%s' due to active session elsewhere", username)
             return (
                 render_template(
                     "login.html",
@@ -261,6 +318,7 @@ def login():
         session["authenticated"] = True
         session["username"] = username
         session["session_id"] = current_session_id
+        logger.info("User '%s' logged in", username)
         if _is_safe_next(next_target):
             return redirect(next_target)
         return redirect(url_for("index"))
@@ -273,6 +331,7 @@ def login():
     )
 
     if lockout_seconds > 0:
+        logger.warning("User '%s' reached login lockout", username)
         wait_display = _format_wait_min_sec(lockout_seconds)
         return (
             render_template(
@@ -284,6 +343,7 @@ def login():
             {"Retry-After": str(lockout_seconds)},
         )
 
+    logger.warning("Invalid login attempt for user '%s'", username)
     return (
         render_template("login.html", error="Invalid username or password.", next_target=next_target),
         401,
@@ -292,29 +352,19 @@ def login():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    print("\n=== LOGOUT ROUTE CALLED ===")
-    print(f"Request method: {request.method}")
-    print(f"Request path: {request.path}")
-
     username = session.get("username")
-    session_id = session.get("session_id")
-    print(f"Current session username: {username}")
-    print(f"Current session_id: {session_id}")
+    logger.info("Logout requested via %s for user '%s'", request.method, username)
 
     if username:
-        print(f"Clearing session for user: {username}")
         try:
             db.logout_session(username)
         except Exception:
-            pass
+            logger.exception("Failed to clear DB-backed session for user '%s'", username)
 
     session.clear()
     if request.method == "POST":
         return "", 200
     return redirect(url_for("login"))
-
-    print("Redirecting to login page")
-    return redirect(url_for("login_page"))
 
 
 @app.get("/history")
@@ -327,22 +377,48 @@ def settings_page():
     return render_template("settings.html")
 
 
+@app.get("/logs")
+def logs_page():
+    return render_template("logs.html")
+
+
 @app.post("/api/s2b/update")
 def get_current_readings():
 
     if not request.is_json:
+        logger.warning("Sensor update rejected: non-JSON content")
         return jsonify(error="Request body must be JSON."), 415
 
     data = request.get_json(silent=True)
-    print("data:  " + str(data))
     if data is None:
+        logger.warning("Sensor update rejected: malformed JSON")
         return jsonify(error="Request body must contain valid JSON."), 400
 
     if not validate_payload(data):
+        logger.warning("Sensor update rejected: payload validation failed")
         return jsonify(error="Payload failed validation."), 422
 
     log_data(data)
+    logger.info("Sensor update accepted")
     return "", 204
+
+
+@app.get("/api/b2f/logs")
+def get_logs():
+    requested_lines = request.args.get("lines", default=LOG_VIEW_DEFAULT_LINES, type=int)
+    if requested_lines is None:
+        requested_lines = LOG_VIEW_DEFAULT_LINES
+    requested_lines = max(1, min(requested_lines, LOG_VIEW_MAX_LINES))
+
+    lines = _tail_log_lines(requested_lines)
+    return jsonify(
+        {
+            "log_file": LOG_FILE_NAME,
+            "line_count": len(lines),
+            "max_lines": LOG_VIEW_MAX_LINES,
+            "lines": lines,
+        }
+    )
 
 
 @app.get("/api/b2f/update")
@@ -403,4 +479,5 @@ if __name__ == "__main__":
     _bootstrap_auth_accounts()
     cert_path = os.path.join(os.path.dirname(__file__), "cert.pem")
     key_path = os.path.join(os.path.dirname(__file__), "key.pem")
+    logger.info("Starting WeatherStation backend on %s:%s", HOST, PORT)
     app.run(host=HOST, port=PORT, ssl_context=(cert_path, key_path), threaded=True)

@@ -661,6 +661,34 @@ body {
     background: rgba(14, 165, 233, 0.8);
 }
 
+/* ========== Logs Page Styles ========== */
+.logs-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.logs-controls .settings-input {
+    max-width: 140px;
+}
+
+.logs-output {
+    margin-top: 1rem;
+    width: 100%;
+    max-height: 520px;
+    overflow: auto;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    background: rgba(10, 14, 39, 0.75);
+    color: #dbeafe;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
 /* ========== Auth Page Styles ========== */
 .auth-wrapper {
     min-height: 100vh;
