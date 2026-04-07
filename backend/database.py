@@ -54,6 +54,34 @@ def init_db():
             """
         )
 
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS login_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                attempted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        cur.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_login_attempts_username_attempted_at
+            ON login_attempts (username, attempted_at)
+            """
+        )
+
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS login_backoff_state (
+                username TEXT PRIMARY KEY,
+                failed_attempts INTEGER NOT NULL DEFAULT 0,
+                lockout_until DATETIME,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
     _ensure_user_columns()
 
 
@@ -307,6 +335,153 @@ def get_user_auth(username):
         return None
 
     return dict(row)
+
+
+def record_failed_login_attempt(username, max_attempts=5, base_lockout_seconds=60, max_lockout_seconds=900):
+    if not username:
+        return 0
+
+    max_attempts = max(1, int(max_attempts))
+    base_lockout_seconds = max(1, int(base_lockout_seconds))
+    max_lockout_seconds = max(base_lockout_seconds, int(max_lockout_seconds))
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT failed_attempts
+            FROM login_backoff_state
+            WHERE username = ?
+            LIMIT 1
+            """,
+            (username,),
+        )
+        row = cur.fetchone()
+
+        if row is None:
+            failed_attempts = 0
+            cur.execute(
+                """
+                INSERT INTO login_backoff_state (username, failed_attempts, lockout_until)
+                VALUES (?, 0, NULL)
+                """,
+                (username,),
+            )
+        else:
+            failed_attempts = int(row["failed_attempts"])
+
+        failed_attempts += 1
+
+        lockout_seconds = 0
+        if failed_attempts >= max_attempts:
+            exponent = failed_attempts - max_attempts
+            lockout_seconds = min(base_lockout_seconds * (2**exponent), max_lockout_seconds)
+            cur.execute(
+                """
+                UPDATE login_backoff_state
+                SET failed_attempts = ?,
+                    lockout_until = datetime('now', ?),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE username = ?
+                """,
+                (failed_attempts, f"+{int(lockout_seconds)} seconds", username),
+            )
+        else:
+            cur.execute(
+                """
+                UPDATE login_backoff_state
+                SET failed_attempts = ?,
+                    lockout_until = NULL,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE username = ?
+                """,
+                (failed_attempts, username),
+            )
+
+        cur.execute(
+            """
+            INSERT INTO login_attempts (username)
+            VALUES (?)
+            """,
+            (username,),
+        )
+        cur.execute(
+            """
+            DELETE FROM login_attempts
+            WHERE attempted_at < datetime('now', '-1 day')
+            """
+        )
+
+    return int(lockout_seconds)
+
+
+def get_login_lockout_seconds_remaining(username):
+    if not username:
+        return 0
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT CAST(strftime('%s', lockout_until) - strftime('%s', 'now') AS INTEGER) AS seconds_remaining
+            FROM login_backoff_state
+            WHERE username = ?
+            LIMIT 1
+            """,
+            (username,),
+        )
+        row = cur.fetchone()
+
+    if row is None or row["seconds_remaining"] is None:
+        return 0
+
+    return max(0, int(row["seconds_remaining"]))
+
+
+def clear_failed_login_attempts(username):
+    if not username:
+        return
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            DELETE FROM login_attempts
+            WHERE username = ?
+            """,
+            (username,),
+        )
+        cur.execute(
+            """
+            DELETE FROM login_backoff_state
+            WHERE username = ?
+            """,
+            (username,),
+        )
+
+
+def is_login_rate_limited(username, max_attempts=5, window_seconds=60):
+    if not username:
+        return False
+
+    if get_login_lockout_seconds_remaining(username) > 0:
+        return True
+
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT COUNT(*) AS attempt_count
+            FROM login_attempts
+            WHERE username = ?
+              AND attempted_at >= datetime('now', ?)
+            """,
+            (username, f"-{int(window_seconds)} seconds"),
+        )
+        row = cur.fetchone()
+
+    attempt_count = row["attempt_count"] if row is not None else 0
+    return attempt_count >= int(max_attempts)
 
 
 def login_session(username, session_id):

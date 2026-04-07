@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs - Weather Station Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>Weather Station</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="nav-link">Dashboard</a></li>
+                <li><a href="/history" class="nav-link">History</a></li>
+                <li><a href="/settings" class="nav-link">Settings</a></li>
+                <li><a href="/logs" class="nav-link active">Logs</a></li>
+                <li class="nav-user">Logged in as {{ session.get('username', 'unknown') }}</li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="dashboard">
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2 class="card-title">
+                    <span class="card-title-icon">Log</span>
+                    Backend Logs (Read-Only)
+                </h2>
+                <div class="logs-controls">
+                    <label for="lines-input" class="settings-label">Lines</label>
+                    <input id="lines-input" class="settings-input" type="number" min="1" max="1000" value="200">
+                    <button id="refresh-logs-btn" class="btn btn-primary" type="button">Refresh</button>
+                    <button id="download-logs-btn" class="btn btn-secondary" type="button">Download .log</button>
+                </div>
+                <div id="logs-meta" class="auth-help">Loading logs...</div>
+                <pre id="logs-output" class="logs-output">Loading logs...</pre>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Weather Station. All rights reserved.</p>
+            <p>Last updated: <span id="last-updated">Loading...</span></p>
+        </div>
+    </footer>
+
+    <script src="/static/logs.js"></script>
+    <script src="/static/logout.js"></script>
+</body>
+</html>
+
