@@ -6,16 +6,42 @@ document.querySelectorAll('a[href="/logout"]').forEach(function (link) {
     });
 });
 
-var IDLE_TIMEOUT_SEC = 15*60;
-var IDLE_TIMEOUT_MS = 1000*IDLE_TIMEOUT_SEC;
+var IDLE_TIMEOUT_SEC = 15 * 60;
+var IDLE_TIMEOUT_MS = 1000 * IDLE_TIMEOUT_SEC;
 var MOUSEMOVE_THROTTLE_MS = 500;
 var HEARTBEAT_INTERVAL_MS = 5000;
-var timeoutObj = null;
-var lastMouseReset = 0;
+var IDLE_STORAGE_KEY = 'weatherstation:last-activity-at';
+var idleTimeoutObj = null;
 var heartbeatIntervalObj = null;
+var lastMouseReset = 0;
+var lastActivityAt = 0;
 
 function shouldTrackIdle() {
     return window.location.pathname !== '/login';
+}
+
+function readLastActivityAt() {
+    var rawValue = localStorage.getItem(IDLE_STORAGE_KEY);
+    var parsedValue = Number(rawValue);
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+        return Date.now();
+    }
+    return parsedValue;
+}
+
+function persistLastActivityAt(value) {
+    localStorage.setItem(IDLE_STORAGE_KEY, String(value));
+}
+
+function clearIdleTimer() {
+    if (idleTimeoutObj) {
+        clearTimeout(idleTimeoutObj);
+        idleTimeoutObj = null;
+    }
+}
+
+function redirectToLogout() {
+    window.location.replace('/logout');
 }
 
 function scheduleLogout() {
@@ -23,15 +49,29 @@ function scheduleLogout() {
         return;
     }
 
-    if (timeoutObj) {
-        clearTimeout(timeoutObj);
+    clearIdleTimer();
+
+    var remainingMs = Math.max(IDLE_TIMEOUT_MS - (Date.now() - lastActivityAt), 0);
+    idleTimeoutObj = setTimeout(function () {
+        if (Date.now() - lastActivityAt >= IDLE_TIMEOUT_MS) {
+            // Keep UI preferences (theme/unit/refresh) while ending auth session.
+            localStorage.removeItem('username');
+            redirectToLogout();
+            return;
+        }
+
+        scheduleLogout();
+    }, remainingMs);
+}
+
+function markActivity() {
+    if (!shouldTrackIdle()) {
+        return;
     }
 
-    timeoutObj = setTimeout(function () {
-        // Keep UI preferences (theme/unit/refresh) while ending auth session.
-        localStorage.removeItem('username');
-        window.location = '/logout';
-    }, IDLE_TIMEOUT_MS);
+    lastActivityAt = Date.now();
+    persistLastActivityAt(lastActivityAt);
+    scheduleLogout();
 }
 
 function handleMouseMove() {
@@ -40,7 +80,7 @@ function handleMouseMove() {
         return;
     }
     lastMouseReset = now;
-    scheduleLogout();
+    markActivity();
 }
 
 
@@ -86,14 +126,43 @@ function startHeartbeatLoop() {
     }, HEARTBEAT_INTERVAL_MS);
 }
 
+function syncActivityFromOtherTabs(event) {
+    if (event.key !== IDLE_STORAGE_KEY) {
+        return;
+    }
+
+    var updatedAt = Number(event.newValue);
+    if (Number.isFinite(updatedAt) && updatedAt > 0) {
+        lastActivityAt = updatedAt;
+        scheduleLogout();
+    }
+}
+
+function handleVisibilityChange() {
+    if (!shouldTrackIdle()) {
+        return;
+    }
+
+    if (!document.hidden) {
+        markActivity();
+    }
+}
 
 
 
-document.addEventListener('click', scheduleLogout);
+
+document.addEventListener('click', markActivity);
 document.addEventListener('mousemove', handleMouseMove);
-document.addEventListener('keydown', scheduleLogout);
-document.addEventListener('scroll', scheduleLogout, { passive: true });
+document.addEventListener('keydown', markActivity);
+document.addEventListener('pointerdown', markActivity);
+document.addEventListener('touchstart', markActivity, { passive: true });
+document.addEventListener('scroll', markActivity, { passive: true });
+document.addEventListener('focus', markActivity, true);
+window.addEventListener('storage', syncActivityFromOtherTabs);
+document.addEventListener('visibilitychange', handleVisibilityChange);
 
 // Start the timer when an authenticated page loads.
+lastActivityAt = readLastActivityAt();
+persistLastActivityAt(lastActivityAt);
 scheduleLogout();
 startHeartbeatLoop();
