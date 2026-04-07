@@ -64,6 +64,9 @@ app.config["SECRET_KEY"] = os.getenv("WEATHER_SECRET_KEY", "weather-station-dev-
 HOST = os.getenv("WEATHER_API_HOST", "0.0.0.0")
 PORT = int(os.getenv("WEATHER_API_PORT", "4430"))
 SESSION_HEARTBEAT_TIMEOUT_SECONDS = int(os.getenv("WEATHER_SESSION_HEARTBEAT_TIMEOUT_SECONDS", "15"))
+LOGIN_ATTEMPT_MAX_ATTEMPTS = int(os.getenv("WEATHER_LOGIN_ATTEMPT_MAX_ATTEMPTS", "5"))
+LOGIN_ATTEMPT_BASE_LOCKOUT_SECONDS = int(os.getenv("WEATHER_LOGIN_ATTEMPT_BASE_LOCKOUT_SECONDS", "60"))
+LOGIN_ATTEMPT_MAX_LOCKOUT_SECONDS = int(os.getenv("WEATHER_LOGIN_ATTEMPT_MAX_LOCKOUT_SECONDS", "900"))
 
 AUTH_ACCOUNTS_ENV_VAR = "WEATHER_AUTH_ACCOUNTS"
 
@@ -72,6 +75,12 @@ _AUTH_BOOTSTRAPPED = False
 
 def _is_safe_next(target: str | None) -> bool:
     return bool(target) and target.startswith("/") and not target.startswith("//")
+
+
+def _format_wait_min_sec(total_seconds: int) -> str:
+    seconds = max(0, int(total_seconds))
+    minutes, remaining_seconds = divmod(seconds, 60)
+    return f"{minutes}:{remaining_seconds:02d}"
 
 
 def _verify_credentials(username: str, password: str) -> bool:
@@ -210,11 +219,30 @@ def login():
             next_target = "/"
         return render_template("login.html", error=None, next_target=next_target)
 
-    username = request.form.get("username", "")
+    _bootstrap_auth_accounts()
+
+    username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
     next_target = request.form.get("next", "/")
+    if not _is_safe_next(next_target):
+        next_target = "/"
+
+    lockout_seconds = db.get_login_lockout_seconds_remaining(username)
+    if lockout_seconds > 0:
+        wait_display = _format_wait_min_sec(lockout_seconds)
+        return (
+            render_template(
+                "login.html",
+                error=f"Too many login attempts. Please wait {wait_display} and try again.",
+                next_target=next_target,
+            ),
+            429,
+            {"Retry-After": str(lockout_seconds)},
+        )
 
     if _verify_credentials(username, password):
+        db.clear_failed_login_attempts(username)
+
         # Check if user is already logged in elsewhere
         current_session_id = str(uuid.uuid4())
         if db.is_user_logged_in_elsewhere(username, current_session_id):
@@ -237,8 +265,25 @@ def login():
             return redirect(next_target)
         return redirect(url_for("index"))
 
-    if not _is_safe_next(next_target):
-        next_target = "/"
+    lockout_seconds = db.record_failed_login_attempt(
+        username,
+        max_attempts=LOGIN_ATTEMPT_MAX_ATTEMPTS,
+        base_lockout_seconds=LOGIN_ATTEMPT_BASE_LOCKOUT_SECONDS,
+        max_lockout_seconds=LOGIN_ATTEMPT_MAX_LOCKOUT_SECONDS,
+    )
+
+    if lockout_seconds > 0:
+        wait_display = _format_wait_min_sec(lockout_seconds)
+        return (
+            render_template(
+                "login.html",
+                error=f"Too many login attempts. Please wait {wait_display} and try again.",
+                next_target=next_target,
+            ),
+            429,
+            {"Retry-After": str(lockout_seconds)},
+        )
+
     return (
         render_template("login.html", error="Invalid username or password.", next_target=next_target),
         401,
