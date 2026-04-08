@@ -98,8 +98,8 @@ WeatherStation-418/
 
 ## Next Steps
 
-- Read the [Backend Documentation](./2-backend.md) to understand the Python Flask server
-- Read the [Database Documentation](./3-database.md) to learn about data storage
-- Read the [Frontend Documentation](./4-frontend.md) to understand the web interface
-- Read the [Firmware Documentation](./5-firmware.md) to learn about the sensor device
+- Read the [Backend Documentation](./02-backend.md) to understand the Python Flask server
+- Read the [Database Documentation](./03-database.md) to learn about data storage
+- Read the [Frontend Documentation](./04-frontend.md) to understand the web interface
+- Read the [Firmware Documentation](./05-firmware.md) to learn about the sensor device
 

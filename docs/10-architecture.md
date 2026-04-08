@@ -111,7 +111,7 @@ Current implementation runs on ESP32/ESP8266 and standard Python servers (Window
 
 ## Security Architecture
 
-See [9-security.md](9-security.md) for detailed security information.
+See [09-security.md](09-security.md) for detailed security information.
 
 Key security layers:
 - HTTPS encryption (all network communication)
@@ -186,8 +186,8 @@ Cloud server (AWS/Google Cloud) running:
 
 ## See Also
 
-- [1-overview.md](1-overview.md) - Quick project overview
-- [2-backend.md](2-backend.md) - Backend detailed documentation
-- [5-firmware.md](5-firmware.md) - Firmware detailed documentation
+- [01-overview.md](01-overview.md) - Quick project overview
+- [02-backend.md](02-backend.md) - Backend detailed documentation
+- [05-firmware.md](05-firmware.md) - Firmware detailed documentation
 - [11-hardware.md](11-hardware.md) - Pico W hardware and code interaction
-- [9-security.md](9-security.md) - Complete security documentation
+- [09-security.md](09-security.md) - Complete security documentation

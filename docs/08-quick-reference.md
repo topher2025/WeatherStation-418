@@ -5,28 +5,28 @@ A fast lookup guide for common questions and tasks.
 ## Quick Links by Task
 
 ### "I want to understand what this project does"
-→ Read [1-overview.md](1-overview.md) (5 minutes)
+→ Read [01-overview.md](01-overview.md) (5 minutes)
 
 ### "I want to run it locally"
-→ Read [7-getting-started.md](7-getting-started.md) Section "Part 2: Running the Backend"
+→ Read [07-getting-started.md](07-getting-started.md) Section "Part 2: Running the Backend"
 
 ### "I want to understand how the web server works"
-→ Read [2-backend.md](2-backend.md)
+→ Read [02-backend.md](02-backend.md)
 
 ### "I want to know how data is stored"
-→ Read [3-database.md](3-database.md)
+→ Read [03-database.md](03-database.md)
 
 ### "I want to understand the web interface"
-→ Read [4-frontend.md](4-frontend.md)
+→ Read [04-frontend.md](04-frontend.md)
 
 ### "I want to set up the sensor device"
-→ Read [5-firmware.md](5-firmware.md)
+→ Read [05-firmware.md](05-firmware.md)
 
 ### "I want to understand PDF report generation"
-→ Read [6-pdf-reports.md](6-pdf-reports.md)
+→ Read [06-pdf-reports.md](06-pdf-reports.md)
 
 ### "I want to understand security"
-→ Read [9-security.md](9-security.md)
+→ Read [09-security.md](09-security.md)
 
 ### "I want to change something"
 → See "Common Modifications" section below
@@ -450,7 +450,7 @@ Ctrl+Shift+N        → New private window (for testing)
 3. **Read the relevant documentation** - Click links at top of this page
 4. **Explore the code** - Look at actual source files
 5. **Make changes** - Start with styling (CSS) before logic (Python/JS)
-6. **Review security** - Read [9-security.md](9-security.md) before production deployment
+6. **Review security** - Read [09-security.md](09-security.md) before production deployment
 7. **Ask questions** - Check documentation before assuming something is broken
 
 Good luck! 🚀
