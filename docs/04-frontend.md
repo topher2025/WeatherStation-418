@@ -202,14 +202,13 @@ function fetchCurrentWeather() {
 ```
 
 **Network request:**
-```
-Browser                           Backend Server
-  |                                   |
-  | GET /api/b2f/update              |
-  |------------------------------------>|
-  |                   {"temperature": 22.5, ...}
-  |<------------------------------------|
-  | Display the data                  |
+```text
+Browser                                   Backend Server
+  |                                              |
+  |  GET /api/b2f/update  ---------------------->|
+  |                                              |
+  |<---------------  {"temperature": 22.5, ...}  |
+  | Display the data                             |
 ```
 
 #### `fetchHistoricalData()`

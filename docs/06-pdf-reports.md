@@ -174,7 +174,7 @@ This creates 4 charts on one page:
 
 ```
 ┌─────────────────────────────────┐
-│  Weather Charts - Last 24 hours  │
+│  Weather Charts - Last 24 hours │
 ├─────────────────────────────────┤
 │  Temperature (°C)               │  ← Chart 1
 │  [Line graph showing temp]      │
@@ -354,7 +354,7 @@ The PDF uses a dark theme:
 The PDF displays data in a formatted table:
 
 ```
-Timestamp Local     | Temp C | Hum % | Press hPa | Gas Ohms
+Timestamp Local    | Temp C | Hum % | Press hPa | Gas Ohms
 2026-04-08 15:00   |  22.50 |  45.2 |    1013.3 |    14950
 2026-04-08 16:00   |  23.10 |  44.8 |    1013.2 |    15100
 2026-04-08 17:00   |  22.75 |  45.5 |    1013.4 |    14800

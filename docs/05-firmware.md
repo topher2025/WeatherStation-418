@@ -31,10 +31,10 @@ The sensor connects to the microcontroller via **I2C** (a communication protocol
 ```
 Microcontroller          BME680 Sensor
      |                        |
-   SDA (GPIO 21) -------- SDA
-   SCL (GPIO 22) -------- SCL
-   GND ---------- GND
-   3.3V ---------- VCC
+   SDA (GPIO 21) ----------- SDA
+   SCL (GPIO 22) ----------- SCL
+   GND --------------------- GND
+   3.3V -------------------- VCC
 ```
 
 **What is I2C?**

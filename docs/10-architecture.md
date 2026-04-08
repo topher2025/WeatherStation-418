@@ -7,19 +7,19 @@ The Weather Station is a complete IoT system for monitoring environmental condit
 ```
 ┌──────────────────────────────────────────────────────┐
 │          Frontend (Web Dashboard)                    │
-│    - HTML/CSS/JavaScript                            │
-│    - Real-time data display                         │
-│    - PDF/CSV reports                                │
-│    - User settings                                  │
+│    - HTML/CSS/JavaScript                             │
+│    - Real-time data display                          │
+│    - PDF/CSV reports                                 │
+│    - User settings                                   │
 └────────────┬─────────────────────────────────────────┘
              │ HTTPS
 ┌────────────▼─────────────────────────────────────────┐
 │          Backend (Flask API Server)                  │
-│    - Authentication & Authorization                 │
-│    - REST API endpoints                             │
-│    - Session management                             │
-│    - Data validation                                │
-│    - Report generation                              │
+│    - Authentication & Authorization                  │
+│    - REST API endpoints                              │
+│    - Session management                              │
+│    - Data validation                                 │
+│    - Report generation                               │
 └────────────┬─────────────────────────────────────────┘
              │
 ┌────────────▼─────────────────────────────────────────┐

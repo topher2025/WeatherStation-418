@@ -25,12 +25,12 @@ The **Raspberry Pi Pico W** is a small microcontroller board designed for embedd
 │     Raspberry Pi Pico W Board           │
 │                                         │
 │  RP2040 CPU                             │
-│  ├─ Dual ARM Cortex-M0+ @ 125 MHz      │
+│  ├─ Dual ARM Cortex-M0+ @ 125 MHz       │
 │  ├─ 264 KB RAM                          │
 │  └─ 2 MB Flash storage                  │
 │                                         │
 │  Wireless                               │
-│  ├─ WiFi 802.11b/g/n (2.4 GHz)        │
+│  ├─ WiFi 802.11b/g/n (2.4 GHz)          │
 │  └─ Bluetooth LE                        │
 │                                         │
 │  I/O                                    │
@@ -157,8 +157,8 @@ A communication standard for connecting microcontroller to sensors:
 Pico W                          BME680 Sensor
 ├─ GPIO 7 (SCL) ───────────────── SCL (Clock)
 ├─ GPIO 6 (SDA) ───────────────── SDA (Data)
-├─ 3.3V ────────────────────────── VCC (Power)
-└─ GND ─────────────────────────── GND (Ground)
+├─ 3.3V ───────────────────────── VCC (Power)
+└─ GND ────────────────────────── GND (Ground)
 ```
 
 **Features:**
@@ -198,8 +198,8 @@ BME680 Pinout:
   Pin 2: GND ─────────────────── Pico GND
   Pin 3: SCL ─────────────────── Pico GPIO 7
   Pin 4: SDA ─────────────────── Pico GPIO 6
-  Pin 5: CSB (Chip Select) ────── Pico 3V3 (tied high for I2C mode)
-  Pin 6: SDO (Address Select) ─── Pico GND (selects address 0x77)
+  Pin 5: CSB (Chip Select) ───── Pico 3V3 (tied high for I2C mode)
+  Pin 6: SDO (Address Select) ── Pico GND (selects address 0x77)
 ```
 
 ### I2C Communication Sequence

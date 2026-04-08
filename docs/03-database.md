@@ -54,7 +54,7 @@ Stores login credentials and session information.
 
 **Example data:**
 ```
-id | username | password_hash              | is_active | session_id            | last_heartbeat_at
+id | username | password_hash             | is_active | session_id             | last_heartbeat_at
 1  | admin    | pbkdf2:sha256:abc123...   | 1         | 550e8400-e29b-41d4...  | 2026-04-08 15:30
 ```
 
@@ -171,7 +171,7 @@ data = get_hourly_average_weather(12)
 ```
 
 **Why average?** 
-If you have 12 readings per hour for 7 days, that's 12 × 24 × 7 = 2,016 data points. That's too much data to display nicely on a graph. Averaging reduces it to just 168 data points (one per hour).
+If you have 1 reading every 5 seconds even just one day, that's 12 × 60 × 24 = 17,280 data points. That's too much data to display nicely on a graph. Averaging reduces it to just 24 data points (one per hour).
 
 #### `get_all_hourly_average_weather()`
 ```python
