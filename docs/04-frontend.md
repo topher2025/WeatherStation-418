@@ -79,7 +79,7 @@ Displays the last N lines of the application log file.
 
 This is the brain of the dashboard. Let's break it down.
 
-### 1. Configuration
+### 01. Configuration
 
 ```javascript
 const CONFIG = {
@@ -95,7 +95,7 @@ const DEFAULT_SETTINGS = {
 };
 ```
 
-### 2. State Variables
+### 02. State Variables
 
 ```javascript
 let currentWeatherData = null;    // Stores latest weather reading
@@ -107,7 +107,7 @@ let settings = { ...DEFAULT_SETTINGS };  // User preferences
 
 **State** = Data stored in memory while the page is open.
 
-### 3. Initialization
+### 03. Initialization
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function () {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
 - Everything is ready, now we can start JavaScript code
 - This is when we fetch initial data and set up timers
 
-### 4. Main Functions
+### 04. Main Functions
 
 #### `initializeDashboard()`
 Runs when the page loads. Sets up everything:
@@ -233,7 +233,7 @@ function configureAutoRefresh(refreshSeconds) {
 }
 ```
 
-### 5. Temperature Conversion
+### 05. Temperature Conversion
 
 ```javascript
 function cToF(value) {
@@ -245,7 +245,7 @@ function cToF(value) {
 
 Example: 22°C = (22 × 1.8) + 32 = 71.6°F
 
-### 6. Updating the Display
+### 06. Updating the Display
 
 ```javascript
 function updateTemperatureDisplay(value) {
@@ -259,7 +259,7 @@ function updateTemperatureDisplay(value) {
 2. Update its text content
 3. Browser automatically re-renders on screen
 
-### 7. Error Handling
+### 07. Error Handling
 
 ```javascript
 function handleApiError(error, fallbackMessage) {
@@ -339,7 +339,7 @@ function fetchAndDisplayLogs(lineCount) {
 
 The CSS file controls how everything looks. Key concepts:
 
-### 1. CSS Variables (Custom Properties)
+### 01. CSS Variables (Custom Properties)
 
 ```css
 :root {
@@ -355,7 +355,7 @@ The CSS file controls how everything looks. Key concepts:
 - Easier for dark/light themes
 - Better organization
 
-### 2. Layout
+### 02. Layout
 
 The site uses **CSS Flexbox** for layout:
 
@@ -379,7 +379,7 @@ The site uses **CSS Flexbox** for layout:
 - On desktop: cards in a row
 - On mobile: cards stack vertically
 
-### 3. Grid Layout
+### 03. Grid Layout
 
 Inside cards, data uses **CSS Grid**:
 
@@ -394,7 +394,7 @@ Inside cards, data uses **CSS Grid**:
 
 **Grid = table-like layout** but more flexible
 
-### 4. Responsive Design
+### 04. Responsive Design
 
 ```css
 @media (max-width: 768px) {
@@ -410,7 +410,7 @@ Inside cards, data uses **CSS Grid**:
 - Mobile gets 1 column
 - Automatically adjusts
 
-### 5. Animations
+### 05. Animations
 
 ```css
 @keyframes fadeIn {

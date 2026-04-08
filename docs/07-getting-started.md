@@ -393,18 +393,18 @@ python backend/main.py
 
 ## Part 7: Debugging Tips
 
-### 1. Check Logs
+### 01. Check Logs
 ```bash
 cat backend/logs/weatherstation.log
 ```
 
-### 2. Test API Manually
+### 02. Test API Manually
 Use curl or Postman to test endpoints.
 
-### 3. Browser Console
+### 03. Browser Console
 Press F12 in your browser, go to "Console" tab to see JavaScript errors.
 
-### 4. Check Database
+### 04. Check Database
 ```python
 import sqlite3
 conn = sqlite3.connect('backend/weather.db')
@@ -413,7 +413,7 @@ cursor.execute("SELECT * FROM weather_data LIMIT 5")
 print(cursor.fetchall())
 ```
 
-### 5. Enable Debug Logging
+### 05. Enable Debug Logging
 In `.env`:
 ```
 WEATHER_LOG_LEVEL=DEBUG

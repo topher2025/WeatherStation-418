@@ -47,7 +47,7 @@ Microcontroller          BME680 Sensor
 
 Let's break down what happens:
 
-### 1. Imports & Setup
+### 01. Imports & Setup
 
 ```python
 from machine import Pin, I2C
@@ -67,7 +67,7 @@ import ujson
 - `json` / `ujson` - Format data
 - `socket` - Network communication
 
-### 2. Loading Configuration
+### 02. Loading Configuration
 
 ```python
 with open("pins.json") as f:
@@ -92,7 +92,7 @@ with open("host.json") as f:
 }
 ```
 
-### 3. Sensor Initialization
+### 03. Sensor Initialization
 
 ```python
 i2c = I2C(id=1, scl=Pin(pins["scl"]), sda=Pin(pins["sda"]), freq=100000)

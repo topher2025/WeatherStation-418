@@ -16,7 +16,7 @@ This file contains all functions for reading and writing data.
 
 ## Database Tables
 
-### 1. `weather_data` - Weather Readings
+### 01. `weather_data` - Weather Readings
 
 Stores every sensor reading from the device.
 
@@ -37,7 +37,7 @@ id  | timestamp           | temperature | humidity | pressure | gas_resistance
 3   | 2026-04-08 15:10   | 22.3        | 45.5     | 1013.30  | 15200.0
 ```
 
-### 2. `users` - User Accounts
+### 02. `users` - User Accounts
 
 Stores login credentials and session information.
 
@@ -58,7 +58,7 @@ id | username | password_hash              | is_active | session_id            |
 1  | admin    | pbkdf2:sha256:abc123...   | 1         | 550e8400-e29b-41d4...  | 2026-04-08 15:30
 ```
 
-### 3. `login_attempts` - Failed Logins
+### 03. `login_attempts` - Failed Logins
 
 Records every failed login attempt (used for rate limiting).
 
@@ -71,7 +71,7 @@ Records every failed login attempt (used for rate limiting).
 **Why track this?**
 After 5 failed attempts, the account gets locked for a time. This prevents hackers from guessing passwords.
 
-### 4. `login_backoff_state` - Lockout Info
+### 04. `login_backoff_state` - Lockout Info
 
 Stores lockout status for rate limiting.
 

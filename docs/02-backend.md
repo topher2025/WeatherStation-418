@@ -13,7 +13,7 @@ The backend is the "brain" of the Weather Station. It's a Python web server buil
 
 This file contains the entire Flask application. Let's break it down into sections.
 
-### 1. Configuration & Setup
+### 01. Configuration & Setup
 
 ```python
 app = Flask(__name__, ...)
@@ -25,7 +25,7 @@ app.config["SECRET_KEY"] = os.getenv("WEATHER_SECRET_KEY", "...")
 - Sets a secret key used for encrypting session cookies (user login info)
 - Configures security settings
 
-### 2. Logging
+### 02. Logging
 
 ```python
 def _configure_logging() -> logging.Logger:
@@ -37,7 +37,7 @@ def _configure_logging() -> logging.Logger:
 - Records all important events (logins, errors, data received, etc.)
 - Helps you troubleshoot problems
 
-### 3. Authentication System
+### 03. Authentication System
 
 The backend includes a complete login system:
 
@@ -79,7 +79,7 @@ def logout_session(username):
 - If yes, you can see protected pages
 - If no, you're sent to login
 
-### 4. API Endpoints
+### 04. API Endpoints
 
 An endpoint is like a doorbell - when someone "rings it" (makes a request), something happens.
 
@@ -159,7 +159,7 @@ def download_weather_report_pdf():
     # Uses custom PDF generation code
 ```
 
-### 5. Login & Logout
+### 05. Login & Logout
 
 **GET/POST `/login`**
 ```python
@@ -182,7 +182,7 @@ def logout():
     # Redirects to login page
 ```
 
-### 6. Web Pages (HTML Rendering)
+### 06. Web Pages (HTML Rendering)
 
 These endpoints return HTML pages (not data):
 
@@ -200,7 +200,7 @@ def index():
 
 This renders an HTML file and sends it to your browser.
 
-### 7. Security Features
+### 07. Security Features
 
 #### CORS & Session Security
 ```python

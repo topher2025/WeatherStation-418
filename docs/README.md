@@ -4,7 +4,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ## 📚 Documentation Files
 
-### 1. **[Overview](01-overview.md)** - START HERE!
+### 01. **[Overview](01-overview.md)** - START HERE!
 **Best for:** Understanding what the project does and how it works  
 **Time to read:** 5-10 minutes  
 **What you'll learn:**
@@ -15,7 +15,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 2. **[Backend Documentation](02-backend.md)** - The Web Server
+### 02. **[Backend Documentation](02-backend.md)** - The Web Server
 **Best for:** Understanding Flask and the API  
 **Time to read:** 20-30 minutes  
 **What you'll learn:**
@@ -34,7 +34,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 3. **[Database Documentation](03-database.md)** - Data Storage
+### 03. **[Database Documentation](03-database.md)** - Data Storage
 **Best for:** Understanding how data is stored and retrieved  
 **Time to read:** 20-30 minutes  
 **What you'll learn:**
@@ -53,7 +53,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 4. **[Frontend Documentation](04-frontend.md)** - The Web Interface
+### 04. **[Frontend Documentation](04-frontend.md)** - The Web Interface
 **Best for:** Understanding HTML, CSS, and JavaScript  
 **Time to read:** 20-30 minutes  
 **What you'll learn:**
@@ -72,7 +72,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 5. **[Firmware Documentation](05-firmware.md)** - The Sensor Device
+### 05. **[Firmware Documentation](05-firmware.md)** - The Sensor Device
 **Best for:** Understanding the microcontroller code  
 **Time to read:** 20-30 minutes  
 **What you'll learn:**
@@ -91,7 +91,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 6. **[PDF Report Generation](06-pdf-reports.md)** - Report Building
+### 06. **[PDF Report Generation](06-pdf-reports.md)** - Report Building
 **Best for:** Understanding how PDF reports are created  
 **Time to read:** 15-20 minutes  
 **What you'll learn:**
@@ -110,7 +110,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 7. **[Getting Started Guide](07-getting-started.md)** - Setup Instructions
+### 07. **[Getting Started Guide](07-getting-started.md)** - Setup Instructions
 **Best for:** Actually running the code  
 **Time to read:** 30-45 minutes  
 **What you'll learn:**
@@ -129,7 +129,21 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 9. **[Security Documentation](09-security.md)** - Complete Cybersecurity Guide
+### 08. **[Quick Reference Guide](08-quick-reference.md)** - Lookup Guide
+**Best for:** Finding information fast  
+**Time to read:** On-demand (look up as needed)  
+**Contains:**
+- File location reference
+- API endpoint quick reference
+- Database table schemas
+- Common modifications
+- Troubleshooting quick lookup
+- Command line cheat sheet
+- Status codes reference
+
+---
+
+### 09. **[Security Documentation](09-security.md)** - Complete Cybersecurity Guide
 **Best for:** Understanding all security aspects  
 **Time to read:** 30-40 minutes  
 **What you'll learn:**
@@ -188,23 +202,10 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 12. **[Quick Reference Guide](08-quick-reference.md)** - Lookup Guide
-**Best for:** Finding information fast  
-**Time to read:** On-demand (look up as needed)  
-**Contains:**
-- File location reference
-- API endpoint quick reference
-- Database table schemas
-- Common modifications
-- Troubleshooting quick lookup
-- Command line cheat sheet
-- Status codes reference
-
----
 
 ## 🎯 Learning Paths
 
-### Path 1: "I want to understand the project"
+### Path 01: "I want to understand the project"
 1. Read [Overview](01-overview.md) (5 min)
 2. Read [Backend](02-backend.md) (20 min)
 3. Read [Database](03-database.md) (20 min)
@@ -215,7 +216,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### Path 4: "I want to understand all security aspects"
+### Path 02: "I want to understand all security aspects"
 1. Read [Security Documentation](09-security.md) (35-40 min)
 2. Review code comments in [Backend](02-backend.md) (10 min)
 3. Check [Database](03-database.md) for data protection (10 min)
@@ -225,7 +226,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### Path 2: "I want to run it locally"
+### Path 03: "I want to run it locally"
 1. Skim [Overview](01-overview.md) (5 min)
 2. Read [Getting Started](07-getting-started.md) Part 1-3 (20 min)
 3. Follow the steps to run the backend (15 min)
@@ -236,7 +237,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### Path 3: "I want to understand the hardware"
+### Path 04: "I want to understand the hardware"
 1. Read [Hardware Documentation](11-hardware.md) (25-30 min)
 2. Read relevant parts of [Firmware Documentation](05-firmware.md) (15 min)
 3. Check [Quick Reference](08-quick-reference.md) for debugging tips (5 min)
@@ -245,7 +246,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### Path 4: "I want to set up the hardware device"
+### Path 05: "I want to set up the hardware device"
 1. Read [Hardware Documentation](11-hardware.md) - GPIO and I2C sections (10 min)
 2. Read [Firmware Documentation](05-firmware.md) (20 min)
 3. Wire up your Pico W and sensor (30 min)
@@ -361,6 +362,9 @@ WeatherStation-418/
 │   ├── 06-pdf-reports.md
 │   ├── 07-getting-started.md
 │   ├── 08-quick-reference.md
+│   ├── 09-security.md
+│   ├── 10-architecture.md
+│   ├── 11-hardware.md
 │   └── README.md (this file)
 └── ... other files
 ```

@@ -26,14 +26,14 @@ WeatherStation-418/
 
 ## The Three Main Components
 
-### 1. **Hardware (Firmware)**
+### 01. **Hardware (Firmware)**
 - **Location**: `firmware/` folder
 - **Purpose**: Runs on a MicroController (like ESP32 or similar)
 - **Job**: Reads temperature, humidity, pressure, and gas readings from a BME680 sensor
 - **Technology**: MicroPython (a lightweight Python for embedded devices)
 - **How it works**: Collects data every 5 seconds and sends it to the backend API
 
-### 2. **Backend (Web Server)**
+### 02. **Backend (Web Server)**
 - **Location**: `backend/` folder
 - **Purpose**: Processes data and provides APIs
 - **Technology**: Python with Flask web framework
@@ -44,7 +44,7 @@ WeatherStation-418/
   - Provides API endpoints for the frontend
   - Generates reports
 
-### 3. **Frontend (Web Dashboard)**
+### 03. **Frontend (Web Dashboard)**
 - **Location**: `frontend/` folder
 - **Purpose**: Visual interface for users
 - **Technology**: HTML, CSS, and JavaScript
