@@ -5,6 +5,8 @@ from bme680 import BME680_I2C
 import json
 import socket
 import ujson
+import ssl
+
 
 # Load json files
 with open("pins.json") as f:
@@ -14,6 +16,27 @@ with open("host.json") as f:
 
 i2c = I2C(id=1, scl=Pin(pins["scl"]), sda=Pin(pins["sda"]), freq=100000)
 bme = BME680_I2C(i2c=i2c)
+
+
+def _wrap_socket_with_ssl(sock):
+    """Wrap socket with SSL/TLS, compatible with both Python 3.10+ and MicroPython"""
+    try:
+        # Python 3.10+ approach using SSLContext
+        if hasattr(ssl, "create_default_context"):
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+            return context.wrap_socket(sock, server_hostname=host["ip"])
+    except (AttributeError, Exception):
+        pass
+
+    # Fallback for MicroPython or older Python versions
+    try:
+        return ssl.wrap_socket(sock, cert_reqs=ssl.CERT_NONE)
+    except TypeError:
+        # Some MicroPython versions don't accept cert_reqs as keyword
+        return ssl.wrap_socket(sock)
+
 
 
 def connect_wifi():
@@ -88,6 +111,10 @@ def send_json(data, retries=3):
             addr = socket.getaddrinfo(host["ip"], host["port"])[0][-1]
             s = socket.socket()
             s.settimeout(5)
+
+            # Wrap socket with SSL/TLS (compatible with Python 3.10+ and MicroPython)
+            s = _wrap_socket_with_ssl(s)
+
             s.connect(addr)
             s.sendall(request.encode())
 
