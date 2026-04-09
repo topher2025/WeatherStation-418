@@ -72,13 +72,14 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 
 ---
 
-### 05. **[Firmware Documentation](05-firmware.md)** - The Sensor Device
-**Best for:** Understanding the microcontroller code  
+### 05. **[Firmware Documentation](05-firmware.md)** - Hardware Firmware + Simulator
+**Best for:** Understanding the device firmware and the devops sensor simulator  
 **Time to read:** 20-30 minutes  
 **What you'll learn:**
 - What firmware is and how it differs from backend code
 - How to wire a BME680 sensor
 - How the microcontroller reads sensors
+- How the devops simulator generates sensor readings without hardware
 - How it sends data to the backend
 - MicroPython vs regular Python
 
@@ -220,7 +221,7 @@ Welcome to the comprehensive documentation for the Weather Station project! This
 1. Read [Security Documentation](09-security.md) (35-40 min)
 2. Review code comments in [Backend](02-backend.md) (10 min)
 3. Check [Database](03-database.md) for data protection (10 min)
-4. Review [Firmware](05-firmware.md) for device security (10 min)
+4. Review [Firmware](05-firmware.md) for device and simulator security (10 min)
 
 **Total time:** ~65 minutes
 
@@ -427,7 +428,8 @@ If you only have 10 minutes to look at code:
 
 1. **backend/main.py** - Where everything happens on the server
 2. **frontend/static/index.js** - How the dashboard updates
-3. **firmware/main.py** - How the sensor works
+3. **firmware/main.py** - How the physical sensor works
+4. **devops/firmware/firmware-main.py** - How the simulator sends data
 4. **backend/database.py** - How data is stored/retrieved
 
 ---
