@@ -1,8 +1,13 @@
 # Firmware Documentation
 
-The firmware is the code that runs on the hardware sensor device. It collects weather data and sends it to the backend server.
+This project has two firmware entrypoints:
 
-**Note:** For detailed information about Pico W hardware, GPIO pins, I2C communication, and sockets, see [Hardware Documentation](11-hardware.md).
+- `firmware/main.py` for the physical MicroPython device
+- `devops/firmware/firmware-main.py` for the host-side simulator used in devops/testing
+
+The hardware firmware collects real sensor data and sends it to the backend server. The simulator generates random weather readings, reads `host.json`, and can be configured with `WEATHER_API_HOST` and `WEATHER_API_PORT`.
+
+**Note:** For detailed information about Pico W hardware, GPIO pins, I2C communication, and sockets, see [Hardware Documentation](11-hardware.md). That hardware guide applies to the physical device path, not the devops simulator.
 
 ## What is Firmware?
 
@@ -10,6 +15,25 @@ Firmware is software that runs on embedded devices (hardware like microcontrolle
 - Firmware = code running on the microcontroller
 - Hardware = physical sensor device
 - Network = WiFi connection to your home network
+
+## Firmware Modes
+
+### 1. Physical Device Firmware (`firmware/main.py`)
+
+Use this on the actual microcontroller. It depends on the sensor hardware, pin configuration, and MicroPython libraries.
+
+### 2. Devops Simulator (`devops/firmware/firmware-main.py`)
+
+Use this when you want to test the backend without flashing a board.
+
+What it does:
+- Generates sample temperature, humidity, pressure, and gas readings
+- Sends JSON to `/api/s2b/update`
+- Loads the backend host and port from `host.json`
+- Honors `WEATHER_API_HOST` and `WEATHER_API_PORT`
+- Uses HTTPS with certificate verification disabled for local/dev environments
+
+This simulator is useful for local development, container-based testing, and documentation demos.
 
 ## Device Setup
 

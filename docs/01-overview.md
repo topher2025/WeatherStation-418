@@ -19,6 +19,7 @@ WeatherStation-418/
 ├── backend/          # Python Flask web server (the main API)
 ├── frontend/         # HTML & JavaScript for the web interface
 ├── firmware/         # MicroPython code for the IoT device
+├── devops/firmware/  # Host-side simulator used for local/container testing
 ├── docs/             # Documentation files (you are here)
 ├── devops/           # Docker and deployment configuration
 └── security/         # Security-related configurations
@@ -32,6 +33,13 @@ WeatherStation-418/
 - **Job**: Reads temperature, humidity, pressure, and gas readings from a BME680 sensor
 - **Technology**: MicroPython (a lightweight Python for embedded devices)
 - **How it works**: Collects data every 5 seconds and sends it to the backend API
+
+### 01b. **Devops Firmware Simulator**
+- **Location**: `devops/firmware/firmware-main.py`
+- **Purpose**: Simulates sensor readings without hardware
+- **Job**: Generates weather data and posts it to the backend API
+- **Technology**: Standard Python in Docker / local dev environments
+- **How it works**: Loads `host.json`, sends data every 5 seconds, and honors `WEATHER_API_HOST` / `WEATHER_API_PORT`
 
 ### 02. **Backend (Web Server)**
 - **Location**: `backend/` folder
@@ -77,6 +85,8 @@ WeatherStation-418/
 [User sees weather on web browser]
 ```
 
+For local development without a flashed device, use `devops/firmware/firmware-main.py` instead of the MicroPython firmware.
+
 ## Key Files You'll Work With
 
 | File | Purpose |
@@ -86,6 +96,7 @@ WeatherStation-418/
 | `frontend/index.html` | The main dashboard page |
 | `frontend/static/index.js` | Dashboard JavaScript logic |
 | `firmware/main.py` | Sensor reading and data transmission code |
+| `devops/firmware/firmware-main.py` | Host-side sensor simulator for testing |
 
 ## Technology Stack
 
@@ -93,7 +104,7 @@ WeatherStation-418/
 |-------|-----------|
 | **Frontend** | HTML5, CSS3, Vanilla JavaScript |
 | **Backend** | Python, Flask, SQLite |
-| **Firmware** | MicroPython |
+| **Firmware** | MicroPython on device, Python simulator in devops |
 | **Sensor** | BME680 (Temperature, Humidity, Pressure, Gas) |
 
 ## Next Steps

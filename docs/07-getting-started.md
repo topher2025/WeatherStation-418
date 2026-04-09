@@ -24,6 +24,11 @@ Before you start, you need:
 - WiFi network
 - MicroPython firmware flashed to the device
 
+### For Running Without Hardware
+- Python 3.8 or later
+- Docker (optional, if you want the devops container path)
+- The simulator entrypoint at `devops/firmware/firmware-main.py`
+
 ## Project Overview (Quick Version)
 
 ```
@@ -37,6 +42,8 @@ Physical Sensor (Firmware)
          ↓ (displays information)
     User sees weather data
 ```
+
+If you do not have a flashed board, you can swap in the devops simulator (`devops/firmware/firmware-main.py`) which sends the same API payloads using generated readings.
 
 ## Part 1: Understanding the Code Structure
 
@@ -84,6 +91,13 @@ firmware/
 ├── bme680.py          ← BME680 driver
 ├── pins.json          ← GPIO pin configuration
 └── host.json          ← Backend server address
+```
+
+For containerized or local testing without hardware, use:
+
+```
+devops/firmware/
+└── firmware-main.py    ← Simulated sensor readings and API posting
 ```
 
 ## Part 2: Running the Backend Locally
@@ -150,6 +164,8 @@ You should see a dashboard, but no weather data yet.
 ## Part 3: Testing the Backend API
 
 Without the hardware, you can manually send data:
+
+If you want a more realistic test loop, run the devops simulator instead of sending one-off requests. It reads `host.json`, honors `WEATHER_API_HOST` / `WEATHER_API_PORT`, and posts random readings every 5 seconds.
 
 ### Using Python (from another terminal)
 

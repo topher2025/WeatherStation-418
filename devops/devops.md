@@ -21,3 +21,15 @@ python -c "import backend.database as db; db.insert_weather(37.7, 13.5, 700.6, 2
 # Output: {'id': 1, 'timestamp': '2026-03-21 19:13:03', 'temperature': 37.7, 'humidity': 13.5, 'pressure': 700.6, 'gas_resistance': 265.2}
 ```
 
+ ## Firmware Simulator
+
+For local or container-based testing without hardware, use `devops/firmware/firmware-main.py`.
+
+It:
+- Reads backend host/port from `host.json`
+- Honors `WEATHER_API_HOST` and `WEATHER_API_PORT`
+- Generates sample sensor readings every 5 seconds
+- Posts JSON to `/api/s2b/update`
+
+This path is useful when you want to verify the backend and frontend flow without flashing a microcontroller.
+
