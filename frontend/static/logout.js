@@ -26,11 +26,18 @@ function readLastActivityAt() {
     if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
         return Date.now();
     }
+    if (Date.now() - parsedValue >= IDLE_TIMEOUT_MS) {
+        return Date.now();
+    }
     return parsedValue;
 }
 
 function persistLastActivityAt(value) {
     localStorage.setItem(IDLE_STORAGE_KEY, String(value));
+}
+
+function clearIdleState() {
+    localStorage.removeItem(IDLE_STORAGE_KEY);
 }
 
 function clearIdleTimer() {
@@ -41,6 +48,7 @@ function clearIdleTimer() {
 }
 
 function redirectToLogout() {
+    clearIdleState();
     window.location.replace('/logout');
 }
 
@@ -99,6 +107,7 @@ async function postUsername() {
 
     if (!response.ok) {
         if (response.status === 401) {
+            clearIdleState();
             window.location.href = '/login';
             throw new Error('Authentication required. Redirecting to login...');
         }
