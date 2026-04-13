@@ -192,7 +192,7 @@ def _bootstrap_auth_accounts(force_update=False):
     logger.info("Authentication accounts bootstrapped")
 
 
-def _tail_log_lines(line_count: int) -> list[str]:
+def _tail_log_lines(line_count: int, newest_first: bool = False) -> list[str]:
     if line_count <= 0:
         return []
     if not LOG_FILE_PATH.exists():
@@ -200,7 +200,10 @@ def _tail_log_lines(line_count: int) -> list[str]:
 
     with LOG_FILE_PATH.open("r", encoding="utf-8", errors="replace") as log_file:
         lines = log_file.read().splitlines()
-    return lines[-line_count:]
+    tail = lines[-line_count:]
+    if newest_first:
+        return list(reversed(tail))
+    return tail
 
 
 def _expire_stale_user_sessions():
@@ -545,7 +548,10 @@ def get_logs():
         requested_lines = LOG_VIEW_DEFAULT_LINES
     requested_lines = max(1, min(requested_lines, LOG_VIEW_MAX_LINES))
 
-    lines = _tail_log_lines(requested_lines)
+    requested_order = str(request.args.get("order", "desc")).strip().lower()
+    newest_first = requested_order != "asc"
+
+    lines = _tail_log_lines(requested_lines, newest_first=newest_first)
     log_exists = LOG_FILE_PATH.exists()
     log_size_bytes = LOG_FILE_PATH.stat().st_size if log_exists else 0
     return jsonify(
@@ -556,6 +562,7 @@ def get_logs():
             "size_bytes": log_size_bytes,
             "line_count": len(lines),
             "max_lines": LOG_VIEW_MAX_LINES,
+            "order": "desc" if newest_first else "asc",
             "lines": lines,
         }
     )
@@ -566,7 +573,22 @@ def download_logs():
     if not LOG_FILE_PATH.exists():
         return jsonify(error="Log file does not exist yet."), 404
 
+    requested_order = str(request.args.get("order", "desc")).strip().lower()
+    newest_first = requested_order != "asc"
+
     logger.info("Log download requested by user '%s'", session.get("username"))
+
+    if newest_first:
+        with LOG_FILE_PATH.open("r", encoding="utf-8", errors="replace") as log_file:
+            lines = log_file.read().splitlines()
+        reversed_content = "\n".join(reversed(lines)).encode("utf-8")
+        return send_file(
+            BytesIO(reversed_content),
+            mimetype="text/plain",
+            as_attachment=True,
+            download_name=LOG_FILE_NAME,
+        )
+
     return send_file(
         LOG_FILE_PATH,
         mimetype="text/plain",
