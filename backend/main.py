@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 from io import BytesIO, StringIO
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template, redirect, send_file, session, url_for
+from flask.sessions import SecureCookieSessionInterface
 from werkzeug.security import generate_password_hash, check_password_hash
 import database as db
 from utils.report_pdf import build_weather_pdf
@@ -27,9 +28,17 @@ app = Flask(
 )
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,   # only if using HTTPS
+    SESSION_COOKIE_SECURE=False,  # overridden per request by RequestAwareSessionInterface
     SESSION_COOKIE_SAMESITE="Lax"
 )
+
+
+class RequestAwareSessionInterface(SecureCookieSessionInterface):
+    def get_cookie_secure(self, app):
+        return request.is_secure
+
+
+app.session_interface = RequestAwareSessionInterface()
 
 
 def _load_local_env() -> None:
