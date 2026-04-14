@@ -1,3 +1,7 @@
+---
+title: Quick Reference Guide
+---
+
 # Quick Reference Guide
 
 A fast lookup guide for common questions and tasks.

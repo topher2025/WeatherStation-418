@@ -1,3 +1,7 @@
+---
+title: PDF Report Generation
+---
+
 # PDF Report Generation Documentation
 
 The Weather Station can generate professional PDF reports with charts and data tables. This document explains how it works.

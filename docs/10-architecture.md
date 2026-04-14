@@ -1,3 +1,7 @@
+---
+title: System Architecture
+---
+
 # System Architecture - Updated
 
 ## Project Overview

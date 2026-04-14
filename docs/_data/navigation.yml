@@ -1,0 +1,25 @@
+- title: Home
+  url: /
+- title: Overview
+  url: /01-overview/
+- title: Backend
+  url: /02-backend/
+- title: Database
+  url: /03-database/
+- title: Frontend
+  url: /04-frontend/
+- title: Firmware
+  url: /05-firmware/
+- title: PDF Reports
+  url: /06-pdf-reports/
+- title: Getting Started
+  url: /07-getting-started/
+- title: Quick Reference
+  url: /08-quick-reference/
+- title: Security
+  url: /09-security/
+- title: Architecture
+  url: /10-architecture/
+- title: Hardware
+  url: /11-hardware/
+
