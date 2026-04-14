@@ -1,3 +1,7 @@
+---
+title: Hardware Documentation
+---
+
 # Pico Hardware & Code Interaction
 
 This document explains the hardware components of the Pico W microcontroller and how the firmware code interacts with them through sockets, sensors, and I2C communication.

@@ -1,3 +1,7 @@
+---
+title: Security Documentation
+---
+
 # Complete Security Documentation
 
 This comprehensive guide covers every cybersecurity aspect of the Weather Station project. Security is built into every layer of the system.

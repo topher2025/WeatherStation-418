@@ -1,3 +1,7 @@
+---
+title: Database Documentation
+---
+
 # Database Documentation
 
 The database is where all the weather data and user information is stored. This project uses **SQLite**, a lightweight database that stores everything in a single file.

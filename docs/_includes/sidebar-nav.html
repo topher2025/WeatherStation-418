@@ -1,0 +1,18 @@
+<aside class="docs-sidebar">
+  <div class="docs-sidebar__inner">
+    <h2 class="docs-sidebar__title">Documentation</h2>
+    <nav aria-label="Documentation navigation">
+      <ul class="docs-nav">
+        {% for item in site.data.navigation %}
+          {% assign normalized_item_url = item.url | relative_url %}
+          {% assign normalized_page_url = page.url | replace: 'index.html', '' %}
+          <li>
+            <a class="docs-nav__link{% if normalized_page_url == normalized_item_url %} is-active{% endif %}" href="{{ normalized_item_url }}"{% if normalized_page_url == normalized_item_url %} aria-current="page"{% endif %}>{{ item.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</aside>
+
+

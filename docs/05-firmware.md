@@ -1,3 +1,7 @@
+---
+title: Firmware Documentation
+---
+
 # Firmware Documentation
 
 This project has two firmware entrypoints:

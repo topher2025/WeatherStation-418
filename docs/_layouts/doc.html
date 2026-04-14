@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/sidebar.css' | relative_url }}">
+  </head>
+  <body>
+    <div class="docs-shell">
+      {% include sidebar-nav.html %}
+      <main class="docs-content" aria-label="Content">
+        <div class="docs-content__inner">
+          {{ content }}
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+
+
