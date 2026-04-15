@@ -22,8 +22,8 @@ LED_ON_VALUE = 1
 DEBUG = False
 
 try:
-    # Prefer configurable pin, otherwise use common board LED alias.
-    GREEN_LED = Pin(pins["led_g"], Pin.OUT)
+    # Use the Pico W onboard LED.
+    GREEN_LED = Pin("LED", Pin.OUT)
 except Exception:
     GREEN_LED = None
 
@@ -87,6 +87,19 @@ def connect_wifi():
 def set_green_led_connected():
     if GREEN_LED is not None:
         GREEN_LED.value(LED_ON_VALUE)
+
+
+def blink_green_led_startup(times=10, on_ms=120, off_ms=120):
+    if GREEN_LED is None:
+        return
+
+    off_value = 0 if LED_ON_VALUE else 1
+    GREEN_LED.value(off_value)
+    for _ in range(times):
+        GREEN_LED.value(LED_ON_VALUE)
+        sleep(on_ms / 1000)
+        GREEN_LED.value(off_value)
+        sleep(off_ms / 1000)
 
 
 def blink_green_led_send(blink_ms=150):
@@ -210,6 +223,7 @@ def send_json(data, retries=3):
 
 
 if __name__ == "__main__":
+    blink_green_led_startup()
     connect_wifi()
     main()
 
