@@ -1,0 +1,18 @@
+title: Weather Station Documentation
+description: Project documentation for WeatherStation-418
+url: ""
+baseurl: "/WeatherStation-418"
+markdown: kramdown
+theme: minima
+permalink: pretty
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: false
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: doc
+

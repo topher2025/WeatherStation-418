@@ -1,3 +1,7 @@
+---
+title: Getting Started Guide
+---
+
 # Getting Started Guide
 
 This guide will help you understand and set up the Weather Station project from scratch.

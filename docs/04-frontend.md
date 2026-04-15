@@ -1,3 +1,7 @@
+---
+title: Frontend Documentation
+---
+
 # Frontend Documentation
 
 The frontend is what users see and interact with. It's a web-based dashboard built with HTML, CSS, and JavaScript.

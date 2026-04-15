@@ -1,3 +1,7 @@
+---
+title: Overview
+---
+
 # Weather Station Project Overview
 
 Welcome to the **Weather Station** project! This is a complete system for collecting, storing, and displaying weather data from physical sensors.

@@ -1,3 +1,7 @@
+---
+title: Backend Documentation
+---
+
 # Backend Documentation (Flask API)
 
 The backend is the "brain" of the Weather Station. It's a Python web server built with Flask that handles all the important work.
